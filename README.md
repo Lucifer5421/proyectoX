@@ -31,6 +31,7 @@ Detalle completo en [`docs/decisiones_alcance.md`](docs/decisiones_alcance.md).
 proyectoX/
 ├── README.md
 ├── .env
+├── .env.example
 ├── .gitignore
 ├── Dockerfile
 ├── docker-compose.yml
@@ -44,15 +45,23 @@ proyectoX/
 │   ├── modelo_conceptual_subastas.png
 │   ├── modelo_logico_subastas.png
 │   ├── modelo_er_subastas.pdf
+│   ├── integracion_wow.md       # sync de solo lectura con AzerothCore
 │   └── reglas_negocio.md
 ├── sql/
 │   ├── 01_schema.sql            # DDL del modelo lógico
-│   └── 02_seed.sql              # datos de demostración
+│   ├── 02_seed.sql              # datos de demostración
+│   └── 03_integracion_wow.sql   # migración de claves externas de WoW
 ├── src/
 │   ├── main.py                  # FastAPI + include_router
 │   ├── core/
 │   │   ├── config.py            # variables de entorno
 │   │   └── database.py          # engine, SessionLocal, Base, get_db
+│   ├── integrations/
+│   │   └── wow/
+│   │       ├── config.py        # credenciales/URL del sync
+│   │       ├── client.py        # MySQL de AzerothCore (solo lectura)
+│   │       ├── mapping.py       # filas WoW -> dominio de subastas
+│   │       └── sync.py          # CLI de sincronización
 │   └── modules/
 │       └── auction/
 │           ├── domain/
@@ -67,8 +76,18 @@ proyectoX/
 │           │   └── repository_impl.py
 │           └── presentation/
 │               └── router.py        # endpoints FastAPI
-└── tests/
-    └── test_auction.py
+├── tests/
+│   ├── test_auction.py
+│   └── test_wow_sync.py
+└── wow-server/                  # stack WoW custom (sanitizado)
+    ├── README.md
+    ├── docker-compose.yml
+    ├── .env.example
+    ├── api/
+    ├── scripts/
+    ├── systemd/
+    ├── sql/
+    └── docs/
 ```
 
 ---
@@ -106,6 +125,34 @@ docker compose down -v       # borra también la base de datos
 > El contenedor PostgreSQL usa el puerto **5433** en el host para no chocar con
 > otros PostgreSQL. La API usa el puerto **8002** para no chocar con la API del
 > servidor WoW (8001).
+
+---
+
+## Integración con el servidor WoW
+
+El servidor de WoW (AzerothCore + Docker + Tailscale + API) está en
+[`wow-server/`](wow-server/README.md). Es una copia **sanitizada** del montaje
+real: no incluye el código fuente oficial de AzerothCore (se clona con
+`wow-server/scripts/setup-wow-server.sh`) ni contraseñas.
+
+La API de subastas **sigue usando PostgreSQL** y no se conecta a WoW en tiempo
+de ejecución. La integración es un CLI de **solo lectura**:
+
+```bash
+# 1. Ten el stack WoW y su API configurados (wow-server/api/.env).
+# 2. Añade DATABASE_URL_LOCAL en .env (ver .env.example).
+# 3. Sincroniza:
+wow-server/scripts/sync-wow.sh --dry-run   # ver qué haría
+wow-server/scripts/sync-wow.sh             # personajes + ítems + oro real
+wow-server/scripts/sync-wow.sh --skip-gold # conserva el oro de la demo
+```
+
+El sync copia cuentas, personajes, oro e inventario reales a `jugador`,
+`personaje`, `item` e `inventario`. **Nunca escribe en `acore_*`.** Detalle
+completo en [`docs/integracion_wow.md`](docs/integracion_wow.md).
+
+> Para una base ya creada, aplica la migración:
+> `docker exec -i proyectoX-db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < sql/03_integracion_wow.sql`
 
 ---
 
@@ -218,14 +265,20 @@ pytest -q
 ```
 
 Las pruebas cubren reglas puras del dominio (duración, pujas, compra directa,
-depósito, comisión, cierre y expiración) sin necesitar PostgreSQL.
+depósito, comisión, cierre y expiración) y el mapeo/sincronización de WoW
+(`tests/test_wow_sync.py`), sin necesitar PostgreSQL ni MySQL.
 
 ---
 
 ## Notas
 
 - `delivery-monolith` **no se modifica**; solo se usa como referencia de arquitectura.
-- El proyecto es independiente del servidor WoW: no toca el MySQL de AzerothCore.
+- La API de subastas es independiente en runtime: usa PostgreSQL y no toca el
+  MySQL de AzerothCore. La integración es un CLI de solo lectura
+  (`wow-server/scripts/sync-wow.sh`).
+- `wow-server/` contiene la copia sanitizada del stack WoW custom; el clon
+  oficial de AzerothCore no se publica (se obtiene con
+  `wow-server/scripts/setup-wow-server.sh`).
 - `mod-auctionsim` es opcional y no forma parte de la entrega principal.
-- Si el profesor pide integrar la API con el servidor WoW, se puede cambiar
-  `DATABASE_URL` a MySQL y adaptar los repositorios; la estructura DDD no cambia.
+- Para que las subastas entreguen ítems dentro del juego haría falta SOAP o
+  `mod-auctionsim`; la entrega actual cubre BD + API + documentación + sync.

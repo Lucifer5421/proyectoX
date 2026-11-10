@@ -8,3 +8,8 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Stack WoW copiado: el clon oficial y los secretos no se publican
+wow-server/azerothcore-wotlk/
+wow-server/backups/
+wow-server/api/cuentas.json

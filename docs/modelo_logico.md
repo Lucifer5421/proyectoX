@@ -13,6 +13,7 @@ erDiagram
         varchar nombre
         varchar email UK
         numeric oro
+        int wow_account_id UK
     }
     personaje {
         int id_personaje PK
@@ -21,6 +22,7 @@ erDiagram
         int nivel
         varchar clase
         numeric oro
+        int wow_guid UK
     }
     item {
         int id_item PK
@@ -28,6 +30,7 @@ erDiagram
         varchar rareza
         int nivel_requerido
         numeric precio_base
+        int wow_entry UK
     }
     inventario {
         int id_inventario PK
@@ -108,9 +111,10 @@ erDiagram
 
 | Tabla | Restricción |
 |---|---|
-| `jugador` | `email` UNIQUE, `oro >= 0` (validado en aplicación). |
-| `personaje` | FK `id_jugador` ON DELETE CASCADE. |
-| `inventario` | FK `id_personaje`, FK `id_item`; `cantidad >= 1` (validado en aplicación). |
+| `jugador` | `email` UNIQUE, `wow_account_id` UNIQUE (NULL permitido), `oro >= 0` (validado en aplicación). |
+| `personaje` | FK `id_jugador` ON DELETE CASCADE; `wow_guid` UNIQUE (NULL permitido). |
+| `item` | `wow_entry` UNIQUE (NULL permitido). |
+| `inventario` | FK `id_personaje`, FK `id_item`; `(id_personaje, id_item)` UNIQUE; `cantidad >= 1` (validado en aplicación). |
 | `subasta` | `duracion_horas IN (2,8,24)`; FK `id_vendedor`, FK `id_item`; `precio_salida > 0`. |
 | `puja` | FK `id_subasta`, FK `id_comprador`; `monto > 0`. |
 | `deposito` | `id_subasta` UNIQUE (1:1). |
@@ -128,4 +132,10 @@ CREATE INDEX idx_subasta_fin ON subasta(fecha_fin);
 CREATE INDEX idx_puja_subasta ON puja(id_subasta);
 CREATE INDEX idx_puja_comprador ON puja(id_comprador);
 CREATE INDEX idx_correo_destinatario ON correo(id_destinatario);
+
+-- Claves externas de AzerothCore (integración de solo lectura)
+CREATE UNIQUE INDEX uq_jugador_wow_account ON jugador(wow_account_id);
+CREATE UNIQUE INDEX uq_personaje_wow_guid ON personaje(wow_guid);
+CREATE UNIQUE INDEX uq_item_wow_entry ON item(wow_entry);
+CREATE UNIQUE INDEX uq_inventario_personaje_item ON inventario(id_personaje, id_item);
 ```

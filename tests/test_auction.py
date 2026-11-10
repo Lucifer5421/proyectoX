@@ -62,6 +62,23 @@ def test_compra_directa_cierra_subasta():
     assert puja.monto == Decimal("250")
     assert puja.estado == EstadoPuja.GANADORA
     assert subasta.estado == EstadoSubasta.VENDIDA
+    assert subasta.puja_actual == Decimal("250")
+
+
+def test_puja_actual_refleja_compra_directa_con_pujas_previas():
+    subasta = Subasta(
+        id_vendedor=1,
+        id_item=1,
+        precio_salida=Decimal("100"),
+        precio_compra_directa=Decimal("250"),
+    )
+    subasta.pujar(Decimal("150"), comprador=3)
+    assert subasta.puja_actual == Decimal("150")
+
+    subasta.comprar_directo(comprador=2)
+
+    assert subasta.estado == EstadoSubasta.VENDIDA
+    assert subasta.puja_actual == Decimal("250")
 
 
 def test_compra_directa_no_disponible():
@@ -112,3 +129,4 @@ def test_cerrar_con_pujas_gana_la_mas_alta():
     assert ganadora.monto == Decimal("120")
     assert ganadora.id_comprador == 3
     assert subasta.estado == EstadoSubasta.VENDIDA
+    assert subasta.puja_actual == Decimal("120")

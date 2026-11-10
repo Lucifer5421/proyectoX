@@ -160,8 +160,26 @@ class Subasta:
 
     @property
     def puja_actual(self) -> Decimal:
-        """Monto mínimo actual: la puja más alta o el precio de salida."""
-        activas = [p.monto for p in self.pujas if p.estado == EstadoPuja.ACTIVA]
+        """Monto de referencia de la subasta.
+
+        - Si está vendida, el monto de la puja ganadora (compra directa o
+          cierre), para que la respuesta de la API no muestre el precio de
+          salida como si no se hubiera vendido.
+        - Si está activa, la puja activa más alta.
+        - Si no hay pujas, el precio de salida.
+        """
+        if self.estado == EstadoSubasta.VENDIDA:
+            ganadoras = [
+                p.monto
+                for p in self.pujas
+                if p.estado == EstadoPuja.GANADORA
+            ]
+            if ganadoras:
+                return max(ganadoras)
+
+        activas = [
+            p.monto for p in self.pujas if p.estado == EstadoPuja.ACTIVA
+        ]
         return max(activas) if activas else self.precio_salida
 
     @property

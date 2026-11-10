@@ -1,0 +1,22 @@
+[
+  {
+    "username": "profesor",
+    "password": "auto",
+    "gmlevel": 3
+  },
+  {
+    "username": "alumno1",
+    "password": "auto",
+    "gmlevel": 0
+  },
+  {
+    "username": "alumno2",
+    "password": "auto",
+    "gmlevel": 0
+  },
+  {
+    "username": "alumno3",
+    "password": "auto",
+    "gmlevel": 0
+  }
+]

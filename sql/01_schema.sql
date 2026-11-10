@@ -4,10 +4,11 @@
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS jugador (
-    id_jugador SERIAL PRIMARY KEY,
-    nombre     VARCHAR(64)  NOT NULL,
-    email      VARCHAR(128) UNIQUE NOT NULL,
-    oro        NUMERIC(12,2) NOT NULL DEFAULT 0
+    id_jugador      SERIAL PRIMARY KEY,
+    nombre          VARCHAR(64)  NOT NULL,
+    email           VARCHAR(128) UNIQUE NOT NULL,
+    oro             NUMERIC(12,2) NOT NULL DEFAULT 0,
+    wow_account_id  INTEGER UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS personaje (
@@ -16,22 +17,25 @@ CREATE TABLE IF NOT EXISTS personaje (
     nombre       VARCHAR(64) NOT NULL,
     nivel        INTEGER NOT NULL DEFAULT 1,
     clase        VARCHAR(30),
-    oro          NUMERIC(12,2) NOT NULL DEFAULT 0
+    oro          NUMERIC(12,2) NOT NULL DEFAULT 0,
+    wow_guid     INTEGER UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS item (
     id_item         SERIAL PRIMARY KEY,
-    nombre          VARCHAR(100) NOT NULL,
+    nombre          VARCHAR(255) NOT NULL,
     rareza          VARCHAR(30) DEFAULT 'comun',
     nivel_requerido INTEGER DEFAULT 1,
-    precio_base     NUMERIC(10,2) DEFAULT 0
+    precio_base     NUMERIC(10,2) DEFAULT 0,
+    wow_entry       INTEGER UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS inventario (
     id_inventario SERIAL PRIMARY KEY,
     id_personaje  INTEGER NOT NULL REFERENCES personaje(id_personaje) ON DELETE CASCADE,
     id_item       INTEGER NOT NULL REFERENCES item(id_item) ON DELETE CASCADE,
-    cantidad      INTEGER NOT NULL DEFAULT 1
+    cantidad      INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (id_personaje, id_item)
 );
 
 CREATE TABLE IF NOT EXISTS subasta (

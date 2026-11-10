@@ -13,6 +13,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import relationship
@@ -27,6 +28,8 @@ class JugadorModel(Base):
     nombre = Column(String(64), nullable=False)
     email = Column(String(128), unique=True, nullable=False)
     oro = Column(Numeric(12, 2), nullable=False, default=0)
+    # Cuenta de AzerothCore asociada (integración de solo lectura).
+    wow_account_id = Column(Integer, unique=True, nullable=True, index=True)
 
     personajes = relationship(
         "PersonajeModel", back_populates="jugador", cascade="all, delete-orphan"
@@ -46,6 +49,8 @@ class PersonajeModel(Base):
     nivel = Column(Integer, nullable=False, default=1)
     clase = Column(String(30))
     oro = Column(Numeric(12, 2), nullable=False, default=0)
+    # GUID del personaje en acore_characters.characters.
+    wow_guid = Column(Integer, unique=True, nullable=True, index=True)
 
     jugador = relationship("JugadorModel", back_populates="personajes")
     inventario = relationship(
@@ -72,10 +77,12 @@ class ItemModel(Base):
     __tablename__ = "item"
 
     id_item = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String(100), nullable=False)
+    nombre = Column(String(255), nullable=False)
     rareza = Column(String(30), default="comun")
     nivel_requerido = Column(Integer, default=1)
     precio_base = Column(Numeric(10, 2), default=0)
+    # entry de acore_world.item_template.
+    wow_entry = Column(Integer, unique=True, nullable=True, index=True)
 
     inventarios = relationship("InventarioModel", back_populates="item")
     subastas = relationship("SubastaModel", back_populates="item")
@@ -97,6 +104,14 @@ class InventarioModel(Base):
         nullable=False,
     )
     cantidad = Column(Integer, nullable=False, default=1)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "id_personaje",
+            "id_item",
+            name="uq_inventario_personaje_item",
+        ),
+    )
 
     personaje = relationship("PersonajeModel", back_populates="inventario")
     item = relationship("ItemModel", back_populates="inventarios")

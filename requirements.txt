@@ -6,3 +6,5 @@ pydantic>=2.6.4
 python-dotenv>=1.0.0
 pytest>=8.1.1
 httpx>=0.27.0
+# Integración de solo lectura con el MySQL de AzerothCore
+pymysql>=1.1.0
