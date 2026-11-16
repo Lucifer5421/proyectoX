@@ -1,4 +1,4 @@
-"""DTOs (Data Transfer Objects) de entrada y salida de la API."""
+"""DTOs de entrada y salida del módulo de subastas."""
 
 from datetime import datetime
 from decimal import Decimal
@@ -54,18 +54,5 @@ class PujaOut(BaseModel):
     id_subasta: int
     id_comprador: int
     monto: Decimal
-    estado: str
-    fecha: datetime
-
-
-class CorreoOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id_correo: int
-    id_destinatario: int
-    asunto: str
-    id_item: Optional[int]
-    cantidad: int
-    oro: Decimal
     estado: str
     fecha: datetime

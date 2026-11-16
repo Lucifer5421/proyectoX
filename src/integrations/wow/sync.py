@@ -25,11 +25,13 @@ from src.integrations.wow.mapping import (
     item_desde_fila,
     personaje_desde_fila,
 )
-from src.modules.auction.infrastructure.models_db import (
-    InventarioModel,
-    ItemModel,
+from src.modules.auth.infrastructure.models_db import (
     JugadorModel,
     PersonajeModel,
+)
+from src.modules.inventory.infrastructure.models_db import (
+    InventarioModel,
+    ItemModel,
 )
 
 
@@ -108,13 +110,12 @@ def _find_jugador(session, data):
     return row
 
 
-def _upsert_jugador(session, data, skip_gold: bool):
+def _upsert_jugador(session, data):
     row = _find_jugador(session, data)
     if row is None:
         row = JugadorModel(
             nombre=data["nombre"],
             email=data["email"],
-            oro=data["oro"],
             wow_account_id=data["wow_account_id"],
         )
         session.add(row)
@@ -122,8 +123,6 @@ def _upsert_jugador(session, data, skip_gold: bool):
         return row, "creado"
 
     row.wow_account_id = data["wow_account_id"]
-    if not skip_gold:
-        row.oro = data["oro"]
     return row, "actualizado"
 
 
@@ -209,7 +208,7 @@ def apply_plan(session, plan: SyncPlan, skip_gold: bool = False) -> Dict[str, An
 
     jugadores = {}
     for data in plan.jugadores:
-        row, accion = _upsert_jugador(session, data, skip_gold)
+        row, accion = _upsert_jugador(session, data)
         jugadores[data["wow_account_id"]] = row
         clave = "creados" if accion == "creado" else "actualizados"
         resumen["jugadores"][clave] += 1

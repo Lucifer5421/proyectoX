@@ -26,16 +26,18 @@ solo se cambia `DATABASE_URL` y se adapta el repositorio.
 
 ---
 
-## 2. ¿El grupo hace solo subastas o los 5 módulos?
+## 2. ¿El grupo hace solo subastas o varios módulos?
 
-**Recomendado: solo el módulo de subastas** (el asignado al grupo), con las entidades
-de apoyo necesarias: `jugador`, `personaje`, `item`, `inventario` y `correo`.
+**Recomendado: cuatro módulos WoW** que reflejan el modelo 2.1:
+`auth` (`jugador`, `personaje`), `inventory` (`item`, `inventario`),
+`auction` (`subasta`, `puja`) y `finance` (`deposito`, `comision`,
+`transaccion`, `correo`).
 
-**Por qué:** los otros módulos del molde (`auth`, `restaurant`, `order`, `payment`,
-`tracking`) pertenecen al dominio de delivery, no a WoW. La subasta necesita usuarios,
-personajes, ítems e inventario, pero no necesita restaurantes, pedidos ni repartidores.
-Si el profesor exige el proyecto completo, se pueden agregar módulos WoW equivalentes
-(cuentas, personajes, ítems, subastas, correo) sin rehacer la arquitectura.
+**Por qué:** la subasta necesita cuentas, personajes, ítems, inventario y
+registros financieros. Separarlos en módulos mantiene el monolito modular DDD,
+evita mezclar responsabilidades y deja el dominio de subastas como eje central.
+No se copian los módulos de delivery (`restaurant`, `order`, `payment`,
+`tracking`) porque pertenecen a otro dominio.
 
 ---
 
@@ -45,7 +47,8 @@ Si el profesor exige el proyecto completo, se pueden agregar módulos WoW equiva
 
 - **BD:** modelo conceptual, modelo lógico y `init.sql` (DDL + seed).
 - **Aplicación:** dominio, casos de uso y repositorios.
-- **Presentación:** API FastAPI con endpoints de publicar, pujar, comprar, cerrar y correo.
+- **Presentación:** API FastAPI con endpoints de subastas, pujas, compra directa,
+  cierre, cuentas/personajes, inventario y correo.
 - **Documentación:** reglas de negocio, decisiones y diagramas.
 
 **Por qué:** el molde tiene las 4 capas y la transcripción pide organizar el código y
@@ -71,6 +74,6 @@ documenta aparte; no debe ser un requisito para aprobar el módulo de base de da
 | Pregunta | Decisión |
 |---|---|
 | Motor | PostgreSQL aparte (contenedor propio) |
-| Alcance | Solo subastas + entidades de apoyo |
+| Alcance | Cuatro módulos: auth, inventory, auction y finance |
 | Entregable | BD + API + presentación + documentación |
 | `mod-auctionsim` | Opcional, fuera de la entrega principal |

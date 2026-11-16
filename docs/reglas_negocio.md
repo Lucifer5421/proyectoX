@@ -41,19 +41,21 @@
 
 ### Correo
 - `pendiente`: el ítem/oro aún no fue reclamado.
-- `entregado`: el jugador ya lo reclamó.
+- `leido`: el jugador abrió el correo.
+- `cobrado`: el jugador ya retiró el ítem/oro.
+- `devuelto`: el correo se usó para devolver un ítem al vendedor.
 
 ## Entidades
 
 | Entidad | Descripción |
 |---|---|
-| `jugador` | Cuenta del jugador. |
-| `personaje` | Personaje del jugador (vendedor o comprador). |
+| `jugador` | Cuenta del jugador. No guarda oro; el oro vive en el personaje. |
+| `personaje` | Personaje del jugador (vendedor o comprador) y su oro. |
 | `item` | Ítem subastable. |
 | `inventario` | Ítems que posee un personaje. |
 | `subasta` | Publicación de un ítem con precio, duración y estado. |
 | `puja` | Oferta de un comprador sobre una subasta. |
 | `deposito` | Cobro inicial del 5% al publicar. |
 | `comision` | Cobro del 5% sobre la venta. |
-| `transaccion` | Registro de la operación (puja o compra directa). |
+| `transaccion` | Registro de la operación (puja ganadora o compra directa); el vendedor se deduce de `subasta`. |
 | `correo` | Entrega de ítem/oro al ganador o devolución al vendedor. |

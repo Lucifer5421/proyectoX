@@ -1,6 +1,7 @@
 """Casos de uso del módulo de subastas.
 
-Orquesta el dominio y los repositorios. No conoce FastAPI ni SQL directo.
+Orquesta los módulos auth (personajes/oro), inventory (ítems) y finance
+(depósito, comisión, transacción y correo). No conoce FastAPI ni SQL directo.
 """
 
 from datetime import datetime, timezone
@@ -16,59 +17,45 @@ from src.modules.auction.application.dtos import (
 )
 from src.modules.auction.domain.exceptions import (
     CompraDirectaNoDisponible,
-    FondosInsuficientes,
-    ItemNoDisponible,
-    PersonajeNoEncontrado,
     PujaInsuficiente,
     SubastaCerrada,
     SubastaNoEncontrada,
 )
 from src.modules.auction.domain.models import (
-    Correo,
     EstadoPuja,
     EstadoSubasta,
     Puja,
     Subasta,
-    TipoTransaccion,
-    Transaccion,
 )
 from src.modules.auction.infrastructure.repository_impl import (
-    CorreoRepositoryImpl,
-    ItemRepositoryImpl,
-    JugadorRepositoryImpl,
-    PersonajeRepositoryImpl,
     PujaRepositoryImpl,
     SubastaRepositoryImpl,
-    TransaccionRepositoryImpl,
 )
+from src.modules.auth.application.services import AuthService
+from src.modules.auth.domain.exceptions import FondosInsuficientes
+from src.modules.finance.application.services import FinanceService
+from src.modules.finance.domain.models import Correo, TipoTransaccion
+from src.modules.inventory.application.services import InventoryService
+from src.modules.inventory.domain.exceptions import ItemNoDisponible
 
 
 class AuctionService:
     def __init__(self, session: Session):
         self.session = session
-        self.jugadores = JugadorRepositoryImpl(session)
-        self.personajes = PersonajeRepositoryImpl(session)
-        self.items = ItemRepositoryImpl(session)
+        self.auth = AuthService(session)
+        self.inventory = InventoryService(session)
+        self.finance = FinanceService(session)
         self.subastas = SubastaRepositoryImpl(session)
         self.pujas = PujaRepositoryImpl(session)
-        self.correos = CorreoRepositoryImpl(session)
-        self.transacciones = TransaccionRepositoryImpl(session)
 
     # ------------------------------------------------------------------
     # Publicar
     # ------------------------------------------------------------------
     def publicar_subasta(self, data: PublicarSubastaIn) -> Subasta:
-        vendedor = self.personajes.obtener(data.id_vendedor)
-        if not vendedor:
-            raise PersonajeNoEncontrado(
-                f"El personaje {data.id_vendedor} no existe."
-            )
+        vendedor = self.auth.obtener_personaje(data.id_vendedor)
+        self.inventory.obtener_item(data.id_item)
 
-        item = self.items.obtener(data.id_item)
-        if not item:
-            raise ItemNoDisponible(f"El item {data.id_item} no existe.")
-
-        if not self.personajes.tiene_item(
+        if not self.inventory.tiene_item(
             data.id_vendedor, data.id_item, data.cantidad
         ):
             raise ItemNoDisponible(
@@ -91,17 +78,18 @@ class AuctionService:
             )
 
         # El item queda retenido por la casa de subastas.
-        if not self.personajes.quitar_item(
+        if not self.inventory.quitar_item(
             data.id_vendedor, data.id_item, data.cantidad
         ):
-            raise ItemNoDisponible("No se pudo retirar el item del inventario.")
+            raise ItemNoDisponible(
+                "No se pudo retirar el item del inventario."
+            )
 
         # Cobrar depósito.
-        vendedor.oro -= deposito
-        self.personajes.actualizar_oro(vendedor.id_personaje, vendedor.oro)
+        self.auth.debitar_oro(data.id_vendedor, deposito)
 
         subasta = self.subastas.crear(subasta)
-        self.subastas.crear_deposito(subasta.id_subasta, deposito)
+        self.finance.crear_deposito(subasta.id_subasta, deposito)
         return subasta
 
     # ------------------------------------------------------------------
@@ -110,49 +98,54 @@ class AuctionService:
     def pujar(self, id_subasta: int, data: PujaIn) -> Puja:
         subasta = self.subastas.obtener(id_subasta)
         if not subasta:
-            raise SubastaNoEncontrada(f"La subasta {id_subasta} no existe.")
+            raise SubastaNoEncontrada(
+                f"La subasta {id_subasta} no existe."
+            )
         if subasta.estado != EstadoSubasta.ACTIVA:
             raise SubastaCerrada("La subasta no está activa.")
 
-        comprador = self.personajes.obtener(data.id_comprador)
-        if not comprador:
-            raise PersonajeNoEncontrado(
-                f"El personaje {data.id_comprador} no existe."
-            )
-
+        comprador = self.auth.obtener_personaje(data.id_comprador)
         if data.monto <= subasta.puja_actual:
             raise PujaInsuficiente(
                 f"La puja debe superar {subasta.puja_actual}."
             )
-        if comprador.oro < data.monto:
-            raise FondosInsuficientes("El comprador no tiene oro suficiente.")
+
+        pujas_activas = self.pujas.listar_por_subasta(id_subasta)
+        # Si el comprador ya tenía una puja activa, ese oro está retenido y
+        # se le devolverá antes de cobrar la nueva puja. Se suma al saldo
+        # disponible para no rechazar una subida de su propia puja.
+        reembolso_propio = sum(
+            (
+                p.monto
+                for p in pujas_activas
+                if p.estado == EstadoPuja.ACTIVA
+                and p.id_comprador == data.id_comprador
+            ),
+            Decimal("0"),
+        )
+        if comprador.oro + reembolso_propio < data.monto:
+            raise FondosInsuficientes(
+                "El comprador no tiene oro suficiente."
+            )
 
         # Reembolsar a los postores que quedan superados.
-        for p in self.pujas.listar_por_subasta(id_subasta):
+        for p in pujas_activas:
             if p.estado == EstadoPuja.ACTIVA:
-                anterior = self.personajes.obtener(p.id_comprador)
-                if anterior:
-                    anterior.oro += p.monto
-                    self.personajes.actualizar_oro(
-                        anterior.id_personaje, anterior.oro
-                    )
+                self.auth.acreditar_oro(p.id_comprador, p.monto)
                 self.pujas.actualizar_estado(
                     p.id_puja, EstadoPuja.SUPERADA.value
                 )
 
         # Releer el comprador: si era el postor anterior, su oro cambió
         # con el reembolso y el objeto local quedaría desactualizado.
-        comprador = self.personajes.obtener(data.id_comprador)
-        if not comprador:
-            raise PersonajeNoEncontrado(
-                f"El personaje {data.id_comprador} no existe."
-            )
+        comprador = self.auth.obtener_personaje(data.id_comprador)
         if comprador.oro < data.monto:
-            raise FondosInsuficientes("El comprador no tiene oro suficiente.")
+            raise FondosInsuficientes(
+                "El comprador no tiene oro suficiente."
+            )
 
         # Retener el oro de la nueva puja.
-        comprador.oro -= data.monto
-        self.personajes.actualizar_oro(comprador.id_personaje, comprador.oro)
+        self.auth.debitar_oro(data.id_comprador, data.monto)
 
         nueva = Puja(
             id_subasta=id_subasta,
@@ -164,10 +157,14 @@ class AuctionService:
     # ------------------------------------------------------------------
     # Compra directa
     # ------------------------------------------------------------------
-    def comprar_directo(self, id_subasta: int, data: CompraDirectaIn) -> Puja:
+    def comprar_directo(
+        self, id_subasta: int, data: CompraDirectaIn
+    ) -> Puja:
         subasta = self.subastas.obtener(id_subasta)
         if not subasta:
-            raise SubastaNoEncontrada(f"La subasta {id_subasta} no existe.")
+            raise SubastaNoEncontrada(
+                f"La subasta {id_subasta} no existe."
+            )
         if subasta.estado != EstadoSubasta.ACTIVA:
             raise SubastaCerrada("La subasta no está activa.")
         if subasta.precio_compra_directa is None:
@@ -175,42 +172,44 @@ class AuctionService:
                 "Esta subasta no tiene precio de compra directa."
             )
 
-        comprador = self.personajes.obtener(data.id_comprador)
-        if not comprador:
-            raise PersonajeNoEncontrado(
-                f"El personaje {data.id_comprador} no existe."
+        comprador = self.auth.obtener_personaje(data.id_comprador)
+        pujas_activas = self.pujas.listar_por_subasta(id_subasta)
+        reembolso_propio = sum(
+            (
+                p.monto
+                for p in pujas_activas
+                if p.estado == EstadoPuja.ACTIVA
+                and p.id_comprador == data.id_comprador
+            ),
+            Decimal("0"),
+        )
+        if (
+            comprador.oro + reembolso_propio
+            < subasta.precio_compra_directa
+        ):
+            raise FondosInsuficientes(
+                "El comprador no tiene oro suficiente."
             )
-        if comprador.oro < subasta.precio_compra_directa:
-            raise FondosInsuficientes("El comprador no tiene oro suficiente.")
 
         # Reembolsar pujas activas.
-        for p in self.pujas.listar_por_subasta(id_subasta):
+        for p in pujas_activas:
             if p.estado == EstadoPuja.ACTIVA:
-                anterior = self.personajes.obtener(p.id_comprador)
-                if anterior:
-                    anterior.oro += p.monto
-                    self.personajes.actualizar_oro(
-                        anterior.id_personaje, anterior.oro
-                    )
+                self.auth.acreditar_oro(p.id_comprador, p.monto)
                 self.pujas.actualizar_estado(
                     p.id_puja, EstadoPuja.SUPERADA.value
                 )
 
-        # Releer el comprador: si era el postor anterior, su oro cambió
-        # con el reembolso y el objeto local quedaría desactualizado.
-        comprador = self.personajes.obtener(data.id_comprador)
-        if not comprador:
-            raise PersonajeNoEncontrado(
-                f"El personaje {data.id_comprador} no existe."
-            )
+        # Releer el comprador por el posible reembolso.
+        comprador = self.auth.obtener_personaje(data.id_comprador)
         if comprador.oro < subasta.precio_compra_directa:
-            raise FondosInsuficientes("El comprador no tiene oro suficiente.")
+            raise FondosInsuficientes(
+                "El comprador no tiene oro suficiente."
+            )
 
         monto = subasta.precio_compra_directa
 
         # Cobrar al comprador.
-        comprador.oro -= monto
-        self.personajes.actualizar_oro(comprador.id_personaje, comprador.oro)
+        self.auth.debitar_oro(data.id_comprador, monto)
 
         # Cerrar subasta.
         subasta.estado = EstadoSubasta.VENDIDA
@@ -231,7 +230,7 @@ class AuctionService:
             tipo=TipoTransaccion.COMPRA_DIRECTA,
         )
 
-        self.correos.crear(
+        self.finance.crear_correo(
             Correo(
                 id_destinatario=data.id_comprador,
                 asunto=f"Compra directa: item {subasta.id_item}",
@@ -247,7 +246,9 @@ class AuctionService:
     def cerrar_subasta(self, id_subasta: int) -> Optional[Puja]:
         subasta = self.subastas.obtener(id_subasta)
         if not subasta:
-            raise SubastaNoEncontrada(f"La subasta {id_subasta} no existe.")
+            raise SubastaNoEncontrada(
+                f"La subasta {id_subasta} no existe."
+            )
         if subasta.estado != EstadoSubasta.ACTIVA:
             raise SubastaCerrada("La subasta no está activa.")
         ahora = datetime.now(timezone.utc).replace(tzinfo=None)
@@ -259,7 +260,7 @@ class AuctionService:
         if not pujas:
             subasta.estado = EstadoSubasta.EXPIRADA
             self.subastas.actualizar(subasta)
-            self.correos.crear(
+            self.finance.crear_correo(
                 Correo(
                     id_destinatario=subasta.id_vendedor,
                     asunto=f"Subasta expirada: item {subasta.id_item}",
@@ -277,14 +278,12 @@ class AuctionService:
 
         # Reembolsar cualquier puja activa que no sea la ganadora.
         for p in pujas:
-            if p.id_puja != ganadora.id_puja and p.estado == EstadoPuja.ACTIVA:
+            if (
+                p.id_puja != ganadora.id_puja
+                and p.estado == EstadoPuja.ACTIVA
+            ):
                 p.estado = EstadoPuja.SUPERADA
-                anterior = self.personajes.obtener(p.id_comprador)
-                if anterior:
-                    anterior.oro += p.monto
-                    self.personajes.actualizar_oro(
-                        anterior.id_personaje, anterior.oro
-                    )
+                self.auth.acreditar_oro(p.id_comprador, p.monto)
                 self.pujas.actualizar_estado(
                     p.id_puja, EstadoPuja.SUPERADA.value
                 )
@@ -296,10 +295,10 @@ class AuctionService:
             subasta=subasta,
             id_comprador=ganadora.id_comprador,
             monto=ganadora.monto,
-            tipo=TipoTransaccion.PUJA,
+            tipo=TipoTransaccion.PUJA_GANADORA,
         )
 
-        self.correos.crear(
+        self.finance.crear_correo(
             Correo(
                 id_destinatario=ganadora.id_comprador,
                 asunto=f"Subasta ganada: item {subasta.id_item}",
@@ -318,14 +317,13 @@ class AuctionService:
     def obtener_subasta(self, id_subasta: int) -> Subasta:
         subasta = self.subastas.obtener(id_subasta)
         if not subasta:
-            raise SubastaNoEncontrada(f"La subasta {id_subasta} no existe.")
+            raise SubastaNoEncontrada(
+                f"La subasta {id_subasta} no existe."
+            )
         return subasta
 
     def listar_pujas(self, id_subasta: int) -> List[Puja]:
         return self.pujas.listar_por_subasta(id_subasta)
-
-    def listar_correo(self, id_personaje: int) -> List[Correo]:
-        return self.correos.listar_por_destinatario(id_personaje)
 
     # ------------------------------------------------------------------
     # Interno
@@ -344,24 +342,18 @@ class AuctionService:
         comision = (monto * Subasta.COMISION_PORCENTAJE).quantize(
             Decimal("0.01")
         )
-        vendedor = self.personajes.obtener(subasta.id_vendedor)
-        if vendedor:
-            vendedor.oro += monto - comision
-            self.personajes.actualizar_oro(
-                vendedor.id_personaje, vendedor.oro
-            )
+        self.auth.acreditar_oro(
+            subasta.id_vendedor, monto - comision
+        )
 
-        self.subastas.crear_comision(
+        self.finance.crear_comision(
             subasta.id_subasta,
             Subasta.COMISION_PORCENTAJE * 100,
             comision,
         )
-        self.transacciones.crear(
-            Transaccion(
-                id_subasta=subasta.id_subasta,
-                id_comprador=id_comprador,
-                id_vendedor=subasta.id_vendedor,
-                monto=monto,
-                tipo=tipo,
-            )
+        self.finance.registrar_transaccion(
+            id_subasta=subasta.id_subasta,
+            id_comprador=id_comprador,
+            monto=monto,
+            tipo=tipo,
         )

@@ -142,7 +142,7 @@ def test_item_desde_fila_trunca_nombre_largo():
             "buy_price": 10_000,
         }
     )
-    assert len(item["nombre"]) == 255
+    assert len(item["nombre"]) == 100
     assert item["rareza"] == "raro"
     assert item["precio_base"] == Decimal("1.00")
 

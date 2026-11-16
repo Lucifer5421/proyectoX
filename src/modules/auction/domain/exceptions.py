@@ -17,21 +17,5 @@ class CompraDirectaNoDisponible(SubastaError):
     pass
 
 
-class FondosInsuficientes(SubastaError):
-    pass
-
-
-class ItemNoDisponible(SubastaError):
-    pass
-
-
-class DepositoNoPagado(SubastaError):
-    pass
-
-
-class PersonajeNoEncontrado(SubastaError):
-    pass
-
-
 class SubastaNoEncontrada(SubastaError):
     pass

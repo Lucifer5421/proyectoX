@@ -8,7 +8,7 @@ nuevo con las mismas capas y los componentes necesarios.
 - **Dominio:** subastas de WoW (vendedor, comprador/postor, casa de subastas, correo).
 - **Arquitectura:** monolito modular DDD: `domain` → `application` → `infrastructure` → `presentation`.
 - **Stack:** Python 3.11, FastAPI, SQLAlchemy 2, PostgreSQL 15, Docker Compose.
-- **Modelo ER:** `docs/modelo_er_subastas.drawio` (2 páginas: conceptual y lógico).
+- **Modelo ER:** `docs/modelo_subastas_2.1.drawio` (2 páginas: conceptual y lógico).
 
 ---
 
@@ -17,7 +17,7 @@ nuevo con las mismas capas y los componentes necesarios.
 | Pregunta | Decisión | Motivo |
 |---|---|---|
 | ¿PostgreSQL aparte o MySQL integrado al WoW? | **PostgreSQL aparte** | Sigue el molde, aísla el riesgo y permite demostrar sin tocar el servidor WoW. |
-| ¿Solo subastas o los 5 módulos? | **Solo subastas + entidades de apoyo** | Es el módulo asignado al grupo; los otros módulos del molde son de delivery. |
+| ¿Solo subastas o varios módulos? | **Cuatro módulos: `auth`, `inventory`, `auction`, `finance`** | El modelo 2.1 separa cuentas, inventario, subastas y finanzas; el dominio sigue siendo subastas. |
 | ¿Solo BD, API o todo? | **Todo: BD + API + presentación + documentación** | El molde incluye las 4 capas y la transcripción pide completar módulos. |
 | ¿`mod-auctionsim` entra en la entrega? | **Opcional, fuera de la entrega principal** | Es C++ de AzerothCore y requiere recompilar; la entrega se cubre con BD + API. |
 
@@ -41,16 +41,16 @@ proyectoX/
 │   ├── decisiones_alcance.md    # respuestas a las 4 preguntas
 │   ├── modelo_conceptual.md
 │   ├── modelo_logico.md
-│   ├── modelo_er_subastas.drawio
+│   ├── modelo_subastas_2.1.drawio
 │   ├── modelo_conceptual_subastas.png
 │   ├── modelo_logico_subastas.png
-│   ├── modelo_er_subastas.pdf
+│   ├── modelo_subastas_2.1.pdf
 │   ├── integracion_wow.md       # sync de solo lectura con AzerothCore
 │   └── reglas_negocio.md
 ├── sql/
-│   ├── 01_schema.sql            # DDL del modelo lógico
+│   ├── 01_schema.sql            # DDL del modelo lógico 2.1
 │   ├── 02_seed.sql              # datos de demostración
-│   └── 03_integracion_wow.sql   # migración de claves externas de WoW
+│   └── 03_integracion_wow.sql   # migración del modelo 2.1 + claves WoW
 ├── src/
 │   ├── main.py                  # FastAPI + include_router
 │   ├── core/
@@ -63,21 +63,61 @@ proyectoX/
 │   │       ├── mapping.py       # filas WoW -> dominio de subastas
 │   │       └── sync.py          # CLI de sincronización
 │   └── modules/
-│       └── auction/
+│       ├── auth/                # jugador, personaje y oro del personaje
+│       │   ├── domain/
+│       │   │   ├── models.py
+│       │   │   ├── repositories.py
+│       │   │   └── exceptions.py
+│       │   ├── application/
+│       │   │   └── services.py
+│       │   ├── infrastructure/
+│       │   │   ├── models_db.py
+│       │   │   └── repository_impl.py
+│       │   └── presentation/
+│       │       ├── dtos.py
+│       │       └── router.py
+│       ├── inventory/           # item e inventario personaje-ítem
+│       │   ├── domain/
+│       │   │   ├── models.py
+│       │   │   ├── repositories.py
+│       │   │   └── exceptions.py
+│       │   ├── application/
+│       │   │   └── services.py
+│       │   ├── infrastructure/
+│       │   │   ├── models_db.py
+│       │   │   └── repository_impl.py
+│       │   └── presentation/
+│       │       ├── dtos.py
+│       │       └── router.py
+│       ├── auction/             # subasta y puja
+│       │   ├── domain/
+│       │   │   ├── models.py
+│       │   │   ├── repositories.py
+│       │   │   └── exceptions.py
+│       │   ├── application/
+│       │   │   ├── dtos.py
+│       │   │   └── services.py
+│       │   ├── infrastructure/
+│       │   │   ├── models_db.py
+│       │   │   └── repository_impl.py
+│       │   └── presentation/
+│       │       └── router.py
+│       └── finance/             # depósito, comisión, transacción y correo
 │           ├── domain/
-│           │   ├── models.py        # entidades y reglas puras
-│           │   ├── repositories.py  # interfaces (contratos)
+│           │   ├── models.py
+│           │   ├── repositories.py
 │           │   └── exceptions.py
 │           ├── application/
-│           │   ├── dtos.py          # Pydantic entrada/salida
-│           │   └── services.py      # casos de uso
+│           │   ├── dtos.py
+│           │   └── services.py
 │           ├── infrastructure/
-│           │   ├── models_db.py     # SQLAlchemy ORM
+│           │   ├── models_db.py
 │           │   └── repository_impl.py
 │           └── presentation/
-│               └── router.py        # endpoints FastAPI
+│               └── router.py
 ├── tests/
 │   ├── test_auction.py
+│   ├── test_modules.py
 │   └── test_wow_sync.py
 └── wow-server/                  # stack WoW custom (sanitizado)
     ├── README.md
@@ -147,9 +187,10 @@ wow-server/scripts/sync-wow.sh             # personajes + ítems + oro real
 wow-server/scripts/sync-wow.sh --skip-gold # conserva el oro de la demo
 ```
 
-El sync copia cuentas, personajes, oro e inventario reales a `jugador`,
-`personaje`, `item` e `inventario`. **Nunca escribe en `acore_*`.** Detalle
-completo en [`docs/integracion_wow.md`](docs/integracion_wow.md).
+El sync copia cuentas y personajes (con su oro) e inventario reales a
+`jugador`, `personaje`, `item` e `inventario`. **Nunca escribe en `acore_*`.**
+El oro vive en `personaje`, no en `jugador`, tal como indica el modelo 2.1.
+Detalle completo en [`docs/integracion_wow.md`](docs/integracion_wow.md).
 
 > Para una base ya creada, aplica la migración:
 > `docker exec -i proyectoX-db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < sql/03_integracion_wow.sql`
@@ -167,6 +208,11 @@ completo en [`docs/integracion_wow.md`](docs/integracion_wow.md).
 | `GET` | `/auctions/{id}/bids` | Listar pujas de una subasta. |
 | `POST` | `/auctions/{id}/buy` | Compra directa. |
 | `POST` | `/auctions/{id}/close` | Cerrar/expirar una subasta vencida. |
+| `GET` | `/auth/players` | Listar cuentas de jugador. |
+| `GET` | `/auth/characters` | Listar personajes y su oro. |
+| `GET` | `/auth/characters/{id}` | Detalle de un personaje. |
+| `GET` | `/inventory/items` | Listar el catálogo de ítems. |
+| `GET` | `/inventory/characters/{id}` | Inventario de un personaje. |
 | `GET` | `/mail/{id_personaje}` | Correo de un personaje. |
 | `GET` | `/` | Health check. |
 
@@ -222,16 +268,23 @@ curl http://localhost:8002/mail/2
 - **Conceptual:** entidades, atributos y relaciones con cardinalidades.
 - **Lógico:** tablas, PK/FK, tipos y restricciones.
 
-Abre `docs/modelo_er_subastas.drawio` en [diagrams.net](https://app.diagrams.net/)
+Abre `docs/modelo_subastas_2.1.drawio` en [diagrams.net](https://app.diagrams.net/)
 o en VS Code con la extensión Draw.io. Tiene dos páginas:
 
 1. `modelo conceptual subastas`
 2. `modelo logico subastas`
 
+El modelo 2.1 se refleja en los cuatro módulos: `auth` (`jugador`,
+`personaje`), `inventory` (`item`, `inventario`), `auction` (`subasta`,
+`puja`) y `finance` (`deposito`, `comision`, `transaccion`, `correo`).
+`jugador` no guarda oro (vive en `personaje`), `personaje.nombre` es único,
+`transaccion` no repite `id_vendedor` (se deduce de `subasta`) y
+`correo.estado` usa `pendiente`, `leido`, `cobrado` o `devuelto`.
+
 También hay exportaciones listas para revisar:
 - `docs/modelo_conceptual_subastas.png`
 - `docs/modelo_logico_subastas.png`
-- `docs/modelo_er_subastas.pdf` (2 páginas)
+- `docs/modelo_subastas_2.1.pdf` (2 páginas)
 
 Versiones de lectura rápida en:
 - [`docs/modelo_conceptual.md`](docs/modelo_conceptual.md)
@@ -264,9 +317,11 @@ pip install -r requirements.txt
 pytest -q
 ```
 
-Las pruebas cubren reglas puras del dominio (duración, pujas, compra directa,
-depósito, comisión, cierre y expiración) y el mapeo/sincronización de WoW
-(`tests/test_wow_sync.py`), sin necesitar PostgreSQL ni MySQL.
+Las 20 pruebas cubren reglas puras del dominio (duración, pujas, compra
+directa, depósito, comisión, cierre y expiración), las entidades de
+`auth`/`inventory`/`finance` (`tests/test_modules.py`) y el
+mapeo/sincronización de WoW (`tests/test_wow_sync.py`), sin necesitar
+PostgreSQL ni MySQL.
 
 ---
 
@@ -279,6 +334,8 @@ depósito, comisión, cierre y expiración) y el mapeo/sincronización de WoW
 - `wow-server/` contiene la copia sanitizada del stack WoW custom; el clon
   oficial de AzerothCore no se publica (se obtiene con
   `wow-server/scripts/setup-wow-server.sh`).
+- `wow_account_id`, `wow_guid` y `wow_entry` son columnas técnicas de la
+  integración de solo lectura; no forman parte del modelo lógico 2.1.
 - `mod-auctionsim` es opcional y no forma parte de la entrega principal.
 - Para que las subastas entreguen ítems dentro del juego haría falta SOAP o
   `mod-auctionsim`; la entrega actual cubre BD + API + documentación + sync.

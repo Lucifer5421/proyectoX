@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.modules.auction.application.dtos import (
     CompraDirectaIn,
-    CorreoOut,
     PublicarSubastaIn,
     PujaIn,
     PujaOut,
@@ -17,7 +16,6 @@ from src.modules.auction.application.dtos import (
 from src.modules.auction.application.services import AuctionService
 
 router = APIRouter(prefix="/auctions", tags=["Subastas"])
-mail_router = APIRouter(prefix="/mail", tags=["Correo"])
 
 
 def get_service(db: Session = Depends(get_db)) -> AuctionService:
@@ -95,14 +93,3 @@ def cerrar_subasta(
         return service.cerrar_subasta(id_subasta)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc))
-
-
-# ---------------------------------------------------------------------------
-# Correo
-# ---------------------------------------------------------------------------
-@mail_router.get("/{id_personaje}", response_model=List[CorreoOut])
-def listar_correo(
-    id_personaje: int,
-    service: AuctionService = Depends(get_service),
-):
-    return service.listar_correo(id_personaje)

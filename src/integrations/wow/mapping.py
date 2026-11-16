@@ -64,7 +64,7 @@ def item_desde_fila(row: Dict[str, Any]) -> Dict[str, Any]:
     nombre = row.get("item_name") or f"Item {entry}"
     return {
         "wow_entry": entry,
-        "nombre": str(nombre)[:255],
+        "nombre": str(nombre)[:100],
         "rareza": rareza_nombre(row.get("quality", 0)),
         "nivel_requerido": int(row.get("required_level") or 1),
         "precio_base": cobre_a_oro(row.get("buy_price", 0)),

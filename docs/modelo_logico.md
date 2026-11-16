@@ -1,6 +1,6 @@
 # Modelo lógico — Subastas WoW
 
-El diagrama editable está en `docs/modelo_er_subastas.drawio`
+El diagrama editable está en `docs/modelo_subastas_2.1.drawio`
 (página **modelo logico subastas**). El DDL completo está en `init.sql` y en
 `sql/01_schema.sql`.
 
@@ -12,13 +12,13 @@ erDiagram
         int id_jugador PK
         varchar nombre
         varchar email UK
-        numeric oro
+        timestamp fecha_registro
         int wow_account_id UK
     }
     personaje {
         int id_personaje PK
         int id_jugador FK
-        varchar nombre
+        varchar nombre UK
         int nivel
         varchar clase
         numeric oro
@@ -76,7 +76,6 @@ erDiagram
         int id_transaccion PK
         int id_subasta FK
         int id_comprador FK
-        int id_vendedor FK
         numeric monto
         varchar tipo
         timestamp fecha
@@ -104,23 +103,26 @@ erDiagram
     subasta ||--|| transaccion : id_subasta
     personaje ||--o{ correo : id_destinatario
     item ||--o{ correo : id_item
-    transaccion ||--o{ correo : genera
 ```
 
 ## Restricciones principales
 
 | Tabla | Restricción |
 |---|---|
-| `jugador` | `email` UNIQUE, `wow_account_id` UNIQUE (NULL permitido), `oro >= 0` (validado en aplicación). |
-| `personaje` | FK `id_jugador` ON DELETE CASCADE; `wow_guid` UNIQUE (NULL permitido). |
-| `item` | `wow_entry` UNIQUE (NULL permitido). |
-| `inventario` | FK `id_personaje`, FK `id_item`; `(id_personaje, id_item)` UNIQUE; `cantidad >= 1` (validado en aplicación). |
-| `subasta` | `duracion_horas IN (2,8,24)`; FK `id_vendedor`, FK `id_item`; `precio_salida > 0`. |
-| `puja` | FK `id_subasta`, FK `id_comprador`; `monto > 0`. |
+| `jugador` | `email` UNIQUE; `fecha_registro` NOT NULL DEFAULT now(); `wow_account_id` UNIQUE (NULL permitido). |
+| `personaje` | FK `id_jugador` ON DELETE CASCADE; `nombre` UNIQUE; `nivel >= 1`; `oro >= 0`; `wow_guid` UNIQUE (NULL permitido). |
+| `item` | `nombre VARCHAR(100)`; `wow_entry` UNIQUE (NULL permitido). |
+| `inventario` | FK `id_personaje`, FK `id_item`; `(id_personaje, id_item)` UNIQUE; `cantidad > 0`. |
+| `subasta` | `duracion_horas IN (2,8,24)`; `estado IN ('activa','vendida','expirada','cancelada')`; FK `id_vendedor`, FK `id_item`; `precio_salida > 0` (validado en aplicación). |
+| `puja` | FK `id_subasta`, FK `id_comprador`; `estado IN ('activa','superada','ganadora')`; `monto > 0` (validado en aplicación). |
 | `deposito` | `id_subasta` UNIQUE (1:1). |
 | `comision` | `id_subasta` UNIQUE (1:1). |
-| `transaccion` | `id_subasta` UNIQUE (1:1). |
-| `correo` | FK `id_destinatario`, FK `id_item` ON DELETE SET NULL. |
+| `transaccion` | `id_subasta` UNIQUE (1:1); FK `id_comprador`; `tipo IN ('puja_ganadora','compra_directa')`; el vendedor se deduce de `subasta`. |
+| `correo` | FK `id_destinatario`, FK `id_item` ON DELETE SET NULL; `estado IN ('pendiente','leido','cobrado','devuelto')`. |
+
+> `wow_account_id`, `wow_guid` y `wow_entry` son columnas técnicas de la
+> integración de solo lectura con AzerothCore. No forman parte del modelo
+> lógico 2.1; se documentan en `sql/03_integracion_wow.sql`.
 
 ## Índices recomendados
 

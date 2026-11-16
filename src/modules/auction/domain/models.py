@@ -28,69 +28,6 @@ class EstadoPuja(str, Enum):
     GANADORA = "ganadora"
 
 
-class TipoTransaccion(str, Enum):
-    PUJA = "puja"
-    COMPRA_DIRECTA = "compra_directa"
-
-
-class EstadoCorreo(str, Enum):
-    PENDIENTE = "pendiente"
-    ENTREGADO = "entregado"
-
-
-@dataclass
-class Jugador:
-    nombre: str
-    email: str
-    oro: Decimal = Decimal("0")
-    id_jugador: Optional[int] = None
-
-
-@dataclass
-class Personaje:
-    nombre: str
-    id_jugador: int
-    nivel: int = 1
-    clase: str = ""
-    oro: Decimal = Decimal("0")
-    id_personaje: Optional[int] = None
-
-
-@dataclass
-class Item:
-    nombre: str
-    rareza: str = "comun"
-    nivel_requerido: int = 1
-    precio_base: Decimal = Decimal("0")
-    id_item: Optional[int] = None
-
-
-@dataclass
-class Inventario:
-    id_personaje: int
-    id_item: int
-    cantidad: int = 1
-    id_inventario: Optional[int] = None
-
-
-@dataclass
-class Deposito:
-    id_subasta: int
-    monto: Decimal
-    pagado: bool = False
-    fecha: datetime = field(default_factory=_utcnow)
-    id_deposito: Optional[int] = None
-
-
-@dataclass
-class Comision:
-    id_subasta: int
-    porcentaje: Decimal
-    monto: Decimal
-    fecha: datetime = field(default_factory=_utcnow)
-    id_comision: Optional[int] = None
-
-
 @dataclass
 class Puja:
     id_subasta: int
@@ -99,29 +36,6 @@ class Puja:
     estado: EstadoPuja = EstadoPuja.ACTIVA
     fecha: datetime = field(default_factory=_utcnow)
     id_puja: Optional[int] = None
-
-
-@dataclass
-class Transaccion:
-    id_subasta: int
-    id_comprador: int
-    id_vendedor: int
-    monto: Decimal
-    tipo: TipoTransaccion
-    fecha: datetime = field(default_factory=_utcnow)
-    id_transaccion: Optional[int] = None
-
-
-@dataclass
-class Correo:
-    id_destinatario: int
-    asunto: str
-    id_item: Optional[int] = None
-    cantidad: int = 0
-    oro: Decimal = Decimal("0")
-    estado: EstadoCorreo = EstadoCorreo.PENDIENTE
-    fecha: datetime = field(default_factory=_utcnow)
-    id_correo: Optional[int] = None
 
 
 @dataclass
@@ -156,7 +70,9 @@ class Subasta:
         if self.duracion_horas not in (2, 8, 24):
             raise ValueError("La duración debe ser 2, 8 o 24 horas.")
         if self.fecha_fin is None:
-            self.fecha_fin = self.fecha_inicio + timedelta(hours=self.duracion_horas)
+            self.fecha_fin = self.fecha_inicio + timedelta(
+                hours=self.duracion_horas
+            )
 
     @property
     def puja_actual(self) -> Decimal:
@@ -184,17 +100,23 @@ class Subasta:
 
     @property
     def deposito(self) -> Decimal:
-        return (self.precio_salida * self.DEPOSITO_PORCENTAJE).quantize(Decimal("0.01"))
+        return (
+            self.precio_salida * self.DEPOSITO_PORCENTAJE
+        ).quantize(Decimal("0.01"))
 
     @property
     def comision(self) -> Decimal:
-        return (self.puja_actual * self.COMISION_PORCENTAJE).quantize(Decimal("0.01"))
+        return (self.puja_actual * self.COMISION_PORCENTAJE).quantize(
+            Decimal("0.01")
+        )
 
     def pujar(self, monto: Decimal, comprador: int) -> Puja:
         if self.estado != EstadoSubasta.ACTIVA:
             raise ValueError("La subasta no está activa.")
         if comprador == self.id_vendedor:
-            raise ValueError("El vendedor no puede pujar en su propia subasta.")
+            raise ValueError(
+                "El vendedor no puede pujar en su propia subasta."
+            )
         if monto <= self.puja_actual:
             raise ValueError("La puja debe superar la puja actual.")
         for p in self.pujas:
@@ -212,9 +134,13 @@ class Subasta:
         if self.estado != EstadoSubasta.ACTIVA:
             raise ValueError("La subasta no está activa.")
         if comprador == self.id_vendedor:
-            raise ValueError("El vendedor no puede comprar su propia subasta.")
+            raise ValueError(
+                "El vendedor no puede comprar su propia subasta."
+            )
         if self.precio_compra_directa is None:
-            raise ValueError("Esta subasta no tiene precio de compra directa.")
+            raise ValueError(
+                "Esta subasta no tiene precio de compra directa."
+            )
         compra = Puja(
             id_subasta=self.id_subasta or 0,
             id_comprador=comprador,

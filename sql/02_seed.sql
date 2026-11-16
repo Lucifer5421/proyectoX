@@ -3,9 +3,9 @@
 -- 02_seed.sql: datos iniciales de demostración
 -- ============================================================
 
-INSERT INTO jugador (nombre, email, oro) VALUES
-    ('Luis',    'luis@example.com',   10000.00),
-    ('Aracely', 'aracely@example.com', 5000.00)
+INSERT INTO jugador (nombre, email) VALUES
+    ('Luis',    'luis@example.com'),
+    ('Aracely', 'aracely@example.com')
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO personaje (id_jugador, nombre, nivel, clase, oro)
@@ -33,7 +33,7 @@ SELECT 'Tela de lino', 'comun', 1, 2.00
 WHERE NOT EXISTS (SELECT 1 FROM item WHERE nombre = 'Tela de lino');
 
 INSERT INTO inventario (id_personaje, id_item, cantidad)
-SELECT p.id_personaje, i.id_item, 1
+SELECT p.id_personaje, i.id_item, 2
 FROM personaje p, item i
 WHERE p.nombre = 'Luis'
   AND i.nombre = 'Espada de fuego'
@@ -89,8 +89,6 @@ FROM nueva n
 WHERE inv.id_personaje = n.id_vendedor
   AND inv.id_item = n.id_item
   AND inv.cantidad > 0;
-
-DELETE FROM inventario WHERE cantidad <= 0;
 
 -- Depósito de la subasta de ejemplo (5% de 100 = 5).
 -- La CTE solo descuenta el oro si el depósito se insertó de verdad.

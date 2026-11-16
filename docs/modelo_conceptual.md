@@ -1,22 +1,25 @@
 # Modelo conceptual — Subastas WoW
 
-El diagrama editable está en `docs/modelo_er_subastas.drawio`
+El diagrama editable está en `docs/modelo_subastas_2.1.drawio`
 (página **modelo conceptual subastas**). Esta es la versión de lectura rápida.
 
 ## Entidades y atributos
 
 | Entidad | Atributos principales |
 |---|---|
-| JUGADOR | id_jugador, nombre, email, oro |
+| JUGADOR | id_jugador, nombre, email |
 | PERSONAJE | id_personaje, nombre, nivel, clase, oro |
 | ITEM | id_item, nombre, rareza, nivel_requerido, precio_base |
 | INVENTARIO | id_inventario, cantidad |
-| SUBASTA | id_subasta, precio_salida, precio_compra_directa, duracion_horas, estado, fecha_inicio, fecha_fin |
+| SUBASTA | id_subasta, cantidad, precio_salida, precio_compra_directa, duracion_horas, estado, fecha_inicio, fecha_fin |
 | PUJA | id_puja, monto, fecha, estado |
 | DEPOSITO | id_deposito, monto, pagado, fecha |
 | COMISION | id_comision, porcentaje, monto, fecha |
 | TRANSACCION | id_transaccion, monto, tipo, fecha |
-| CORREO | id_correo, asunto, oro, estado, fecha |
+| CORREO | id_correo, asunto, cantidad, oro, estado, fecha |
+
+> El oro pertenece a PERSONAJE, no a JUGADOR. El modelo lógico agrega
+> `jugador.fecha_registro` y las claves foráneas correspondientes.
 
 ## Relaciones
 
@@ -34,7 +37,6 @@ erDiagram
     SUBASTA ||--|| TRANSACCION : genera
     PERSONAJE ||--o{ CORREO : recibe
     ITEM ||--o{ CORREO : incluye
-    TRANSACCION ||--o{ CORREO : envia
 ```
 
 ## Cardinalidades
@@ -53,7 +55,6 @@ erDiagram
 | SUBASTA — TRANSACCION | 1:1 | Cada subasta vendida genera una transacción. |
 | PERSONAJE — CORREO | 1:N | Un personaje recibe muchos correos. |
 | ITEM — CORREO | 1:N | Un correo puede incluir un ítem. |
-| TRANSACCION — CORREO | 1:N | Una transacción puede generar varios correos. |
 
 > Nota: `DEPOSITO`, `COMISION` y `TRANSACCION` son entidades débiles/de soporte:
 > dependen de `SUBASTA` y se crean en momentos concretos del ciclo de vida.

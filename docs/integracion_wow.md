@@ -33,6 +33,10 @@ proyectoX PostgreSQL (localhost:5433)
 | `item_template` | `item` | `entry` como `wow_entry`, nombre, calidad, nivel y precio. |
 | `character_inventory` + `item_instance` | `inventario` | Cantidad sumada por personaje e ítem. |
 
+En el código, `jugador` y `personaje` pertenecen al módulo `auth`; `item` e
+`inventario` pertenecen a `inventory`. El sync no modifica las tablas de
+`auction` ni de `finance`.
+
 Columnas nuevas (ver `sql/03_integracion_wow.sql`):
 
 - `jugador.wow_account_id` — cuenta de AzerothCore (UNIQUE).
