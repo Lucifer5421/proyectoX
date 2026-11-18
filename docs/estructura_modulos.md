@@ -1,42 +1,56 @@
 # Estructura modular de proyectoX
 
-Este documento fija la estructura de `proyectoX` tomando como molde exacto
-`delivery-monolith`. La diferencia es el dominio: donde delivery habla de
-restaurantes, repartidores y pagos, proyectoX habla de ítems, subastas, pujas
-y finanzas de World of Warcraft.
+Este documento fija la estructura de `proyectoX` a partir del **modelo lógico
+2.1** (`docs/modelo_subastas_2.1.drawio`) y de la organización por capas de
+`delivery-monolith`.
 
-`delivery-monolith` **no se modifica**. Solo se copia su organización de
-carpetas, archivos y capas.
+`delivery-monolith` se usa **solo como referencia de arquitectura**: no se
+modifica y ya no se copian sus nombres de módulos. Los módulos de proyectoX
+son los del dominio de subastas de World of Warcraft.
 
 ## 1. Módulos
 
-La estructura de módulos es la misma de delivery:
-
 ```text
 src/modules/
-├── auth/
-├── order/
-├── payment/
-├── restaurant/
-└── tracking/
+├── auth/        # jugador y personaje
+├── inventory/   # item e inventario
+├── auction/     # subasta y puja
+├── finance/     # depósito, comisión y transacción
+└── mail/        # correo del personaje
 ```
 
-| Módulo | Contenido en proyectoX | Tablas |
+| Módulo | Contenido | Tablas del modelo 2.1 |
 |---|---|---|
-| `auth` | Jugadores y personajes | `jugador`, `personaje` |
-| `restaurant` | Catálogo de ítems e inventario | `item`, `inventario` |
-| `order` | Subastas y pujas | `subasta`, `puja` |
-| `payment` | Depósitos, comisiones, transacciones y correo | `deposito`, `comision`, `transaccion`, `correo` |
-| `tracking` | Sin equivalente en proyectoX | — |
+| `auth` | Cuentas y personajes | `jugador`, `personaje` |
+| `inventory` | Catálogo e inventario | `item`, `inventario` |
+| `auction` | Subastas y pujas | `subasta`, `puja` |
+| `finance` | Movimientos económicos | `deposito`, `comision`, `transaccion` |
+| `mail` | Entrega por correo | `correo` |
 
-El nombre `restaurant` se conserva por exigencia de la estructura de delivery,
-aunque su contenido sea el catálogo de ítems (`Item`) y el inventario
-(`Inventario`) de proyectoX. Lo mismo ocurre con `order` (subastas) y
-`payment` (finanzas).
+Las 10 tablas del modelo 2.1 quedan asignadas a un módulo, sin tablas huérfanas
+y sin módulos vacíos.
 
-## 2. Archivos por módulo
+## 2. Relaciones del modelo 2.1
 
-Cada módulo tiene exactamente esta forma:
+```text
+JUGADOR (1) ──< (N) PERSONAJE
+PERSONAJE (N) ──< INVENTARIO >── (M) ITEM
+PERSONAJE (1) ──< (N) SUBASTA
+ITEM (1) ──< (N) SUBASTA
+SUBASTA (1) ──< (N) PUJA
+PERSONAJE (1) ──< (N) PUJA
+SUBASTA (1) ── (1) TRANSACCION
+SUBASTA (1) ── (1) DEPOSITO
+SUBASTA (1) ── (1) COMISION
+PERSONAJE (1) ──< (N) CORREO
+ITEM (1) ──< (N) CORREO
+```
+
+Cada bloque del DDL documenta la relación y la cardinalidad de su tabla.
+
+## 3. Archivos por módulo
+
+Los módulos con API (`auth`, `inventory`, `auction`, `mail`) tienen esta forma:
 
 ```text
 <modulo>/
@@ -55,7 +69,26 @@ Cada módulo tiene exactamente esta forma:
     └── router.py
 ```
 
-Además, `auth` incluye los cuatro archivos de documentación que trae delivery:
+`finance` es un módulo **interno**: no expone endpoints propios, por eso no
+tiene `presentation/router.py` ni DTOs. Su servicio (`FinanceService`) se usa
+desde `auction` al publicar, cerrar o comprar una subasta.
+
+```text
+finance/
+├── application/
+│   └── services.py
+├── domain/
+│   ├── exceptions.py
+│   ├── models.py
+│   └── repositories.py
+└── infrastructure/
+    ├── external_adapters.py
+    ├── models_db.py
+    └── repository_impl.py
+```
+
+`auth` conserva los cuatro archivos de documentación de la estructura de
+referencia:
 
 ```text
 auth/
@@ -65,64 +98,68 @@ auth/
 └── presentation/capa_exposicion.txt
 ```
 
-`order` conserva en la raíz los archivos `models.py` y `services.py` que
-existen en delivery.
-
-### Archivos que se dejan en blanco
-
-Se dejan vacíos los archivos de delivery que **no tienen contenido propio en
-proyectoX**, para no inventar código ni duplicar responsabilidades:
-
-| Archivo | Por qué queda en blanco |
-|---|---|
-| `tracking/**` | proyectoX no tiene repartidores, rutas ni ubicación en tiempo real. El seguimiento de una subasta (pujas, cierre y expiración) vive en `order`. |
-| `order/models.py` | En proyectoX los modelos de subasta están en `order/domain/models.py`. |
-| `order/services.py` | En proyectoX los casos de uso están en `order/application/services.py`. |
-
-El resto de archivos sí contiene el código real de proyectoX: entidades,
-DTO, servicios, repositorios, modelos ORM, adaptadores y routers.
-
 ### `__init__.py`
 
-Se replica la regla de delivery:
-
-- `auth` **no** tiene `__init__.py`.
-- `order`, `payment`, `restaurant` y `tracking` tienen `__init__.py` solo en
-  la raíz del módulo.
+- `auth` no tiene `__init__.py`.
+- `inventory`, `auction`, `finance` y `mail` tienen `__init__.py` solo en la
+  raíz del módulo.
 - Las carpetas `application`, `domain`, `infrastructure` y `presentation` no
   llevan `__init__.py`.
 
-## 3. Capas y dependencias
+## 4. Capas y dependencias
 
-- `domain` no importa FastAPI, SQLAlchemy ni otros módulos.
-- `application` usa el dominio y las interfaces de repositorio; no conoce
-  FastAPI.
-- `infrastructure` implementa las interfaces, contiene el ORM y los
-  adaptadores externos.
-- `presentation` depende de `application` y expone la API.
-- La comunicación entre módulos se hace por los servicios de aplicación
-  (`AuthService`, `InventoryService`, `FinanceService`), no por SQL directo.
+- `domain` no importa FastAPI, SQLAlchemy ni PostgreSQL. Contiene entidades,
+  validaciones (`ValueError`) y contratos de repositorio.
+- `application` orquesta el dominio y los repositorios; no conoce FastAPI.
+- `infrastructure` implementa los repositorios, contiene las entidades ORM y
+  los adaptadores externos.
+- `presentation` depende de `application` y expone la API REST.
+- La comunicación entre módulos se hace por servicios de aplicación:
+  `AuthService`, `InventoryService`, `FinanceService` y `MailService`.
 
-## 4. Adaptadores externos
+## 5. Adaptadores externos
 
 La integración con AzerothCore es de **solo lectura**:
 
 - `auth/infrastructure/external_adapters.py`: cuentas y personajes.
-- `restaurant/infrastructure/external_adapters.py`: catálogo e inventario.
-- `order` y `payment` no consultan WoW en tiempo de ejecución; sus
+- `inventory/infrastructure/external_adapters.py`: catálogo e inventario.
+- `auction`, `finance` y `mail` no consultan WoW en tiempo de ejecución; sus
   adaptadores quedan como puntos de extensión.
 
 El cliente MySQL y el plan de sincronización viven en
 `src/integrations/wow/`. Esa carpeta es propia de proyectoX y no existe en
-delivery; se mantiene separada para no mezclar la lógica de terceros con las
-reglas de negocio.
+`delivery-monolith`.
 
-## 5. `init.sql` y `main.py`
+## 6. `init.sql` y `main.py`
 
-- `init.sql` está en la **raíz** del proyecto, no dentro de `src/core/`.
-- Sus tablas están separadas con comentarios por módulo:
-  `auth`, `restaurant`, `order` y `payment`.
-- `src/main.py` importa los `models_db.py` en el orden de delivery:
-  `auth`, `restaurant`, `tracking`, `order` y `payment`.
-- `src/main.py` registra los routers de `auth`, `restaurant`, `order` y
-  `payment`. `tracking` no se registra porque no tiene endpoints propios.
+- `init.sql` está en la **raíz** del proyecto.
+- Contiene **solo DDL**: `CREATE TABLE`, PK, FK, `UNIQUE`, `CHECK` e índices.
+  No contiene `INSERT`, `UPDATE`, `DELETE` ni `SELECT`.
+- Cada tabla tiene un bloque de comentarios con su módulo, su PK, sus FK, su
+  cardinalidad y sus reglas.
+- Los datos de demostración viven únicamente en `sql/02_seed.sql`.
+- `sql/01_schema.sql` es una copia exacta de `init.sql` para ejecuciones
+  manuales.
+- `src/main.py` importa los `models_db.py` en orden de llaves foráneas:
+  `auth`, `inventory`, `auction`, `finance` y `mail`.
+- `src/main.py` registra los routers de `auth`, `inventory`, `auction` y
+  `mail`. `finance` no se registra porque no tiene endpoints propios.
+
+## 7. Checklist modelo 2.1 → módulo → DDL
+
+| Tabla | Módulo | Comentario en `init.sql` | Estado |
+|---|---|---|---|
+| `jugador` | `auth` | `auth · JUGADOR` | ✅ |
+| `personaje` | `auth` | `auth · PERSONAJE` | ✅ |
+| `item` | `inventory` | `inventory · ITEM` | ✅ |
+| `inventario` | `inventory` | `inventory · INVENTARIO` | ✅ |
+| `subasta` | `auction` | `auction · SUBASTA` | ✅ |
+| `puja` | `auction` | `auction · PUJA` | ✅ |
+| `deposito` | `finance` | `finance · DEPOSITO` | ✅ |
+| `comision` | `finance` | `finance · COMISION` | ✅ |
+| `transaccion` | `finance` | `finance · TRANSACCION` | ✅ |
+| `correo` | `mail` | `mail · CORREO` | ✅ |
+
+Las columnas `wow_account_id`, `wow_guid` y `wow_entry` son columnas técnicas
+de la integración de solo lectura con AzerothCore. No forman parte del modelo
+lógico 2.1 y están marcadas como tales en el DDL.

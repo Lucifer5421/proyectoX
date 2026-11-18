@@ -34,8 +34,8 @@ proyectoX PostgreSQL (localhost:5433)
 | `character_inventory` + `item_instance` | `inventario` | Cantidad sumada por personaje e ítem. |
 
 En el código, `jugador` y `personaje` pertenecen al módulo `auth`; `item` e
-`inventario` pertenecen a `restaurant`. El sync no modifica las tablas de
-`order` ni de `payment`.
+`inventario` pertenecen a `inventory`. El sync no modifica las tablas de
+`auction`, `finance` ni `mail`.
 
 Columnas nuevas (ver `sql/03_integracion_wow.sql`):
 

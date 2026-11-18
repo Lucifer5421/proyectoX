@@ -28,19 +28,18 @@ solo se cambia `DATABASE_URL` y se adapta el repositorio.
 
 ## 2. ¿El grupo hace solo subastas o varios módulos?
 
-**Recomendado: cinco módulos con la misma estructura de delivery**:
-`auth` (`jugador`, `personaje`), `restaurant` (`item`, `inventario`),
-`order` (`subasta`, `puja`), `payment` (`deposito`, `comision`,
-`transaccion`, `correo`) y `tracking` (sin equivalente en proyectoX).
+**Recomendado: cinco módulos propios del dominio de subastas**:
+`auth` (`jugador`, `personaje`), `inventory` (`item`, `inventario`),
+`auction` (`subasta`, `puja`), `finance` (`deposito`, `comision`,
+`transaccion`) y `mail` (`correo`).
 
-**Por qué:** la subasta necesita cuentas, personajes, ítems, inventario y
-registros financieros. Se conservan los nombres y la organización de
-`delivery-monolith` para que la estructura sea idéntica, pero el contenido es
-el dominio de subastas de WoW. `restaurant` contiene el catálogo de ítems,
-`order` contiene subastas y pujas, y `payment` contiene las finanzas. El módulo
-`tracking` se conserva vacío porque proyectoX no tiene reparto ni seguimiento
-en tiempo real. El detalle del mapeo, de los archivos en blanco y de las capas
-está en [`estructura_modulos.md`](estructura_modulos.md).
+**Por qué:** la subasta necesita cuentas, personajes, ítems, inventario,
+registros financieros y entrega por correo. Los nombres salen del modelo
+lógico 2.1 y no de `delivery-monolith`. `inventory` contiene el catálogo de
+ítems, `auction` las subastas y pujas, `finance` los movimientos económicos y
+`mail` la entrega al ganador o la devolución al vendedor. No hay módulos
+vacíos. El detalle del mapeo y de las capas está en
+[`estructura_modulos.md`](estructura_modulos.md).
 
 ---
 
@@ -48,7 +47,8 @@ está en [`estructura_modulos.md`](estructura_modulos.md).
 
 **Recomendado: todo (BD + API + presentación + documentación).**
 
-- **BD:** modelo conceptual, modelo lógico y `init.sql` (DDL + seed).
+- **BD:** modelo conceptual, modelo lógico, `init.sql` (DDL puro) y
+  `sql/02_seed.sql` (datos de demostración).
 - **Aplicación:** dominio, casos de uso y repositorios.
 - **Presentación:** API FastAPI con endpoints de subastas, pujas, compra directa,
   cierre, cuentas/personajes, inventario y correo.
@@ -77,6 +77,6 @@ documenta aparte; no debe ser un requisito para aprobar el módulo de base de da
 | Pregunta | Decisión |
 |---|---|
 | Motor | PostgreSQL aparte (contenedor propio) |
-| Alcance | Cinco módulos con estructura de delivery: auth, restaurant, order, payment y tracking (tracking vacío) |
+| Alcance | Cinco módulos propios del modelo 2.1: auth, inventory, auction, finance y mail |
 | Entregable | BD + API + presentación + documentación |
 | `mod-auctionsim` | Opcional, fuera de la entrega principal |

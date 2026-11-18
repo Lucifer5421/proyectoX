@@ -1,25 +1,49 @@
 -- ============================================================
--- ProyectoX — Módulo de Subastas WoW
--- Esquema físico (DDL) + datos iniciales (DML)
+-- ProyectoX — Subastas WoW
+-- Esquema físico (DDL) del modelo lógico 2.1
 -- Motor: PostgreSQL 15
--- Basado en modelo_subastas(2.1).drawio
+-- Fuente: modelo_subastas(2.1).drawio
+--
+-- Este archivo contiene SOLO DDL: base de datos, tablas, tipos,
+-- claves primarias, claves foráneas, restricciones e índices.
+-- Los datos de demostración viven en sql/02_seed.sql.
+-- ============================================================
+
+-- ============================================================
+-- MÓDULO auth — Cuentas y personajes
+-- Relación: JUGADOR (1) ──< (N) PERSONAJE
 -- ============================================================
 
 -- ------------------------------------------------------------
--- 1. JUGADOR (módulo auth)
+-- auth · JUGADOR
+-- PK: id_jugador
+-- UK: email
+-- Cardinalidad: 1 jugador tiene N personajes.
+-- Regla: el oro NO vive en el jugador; vive en el personaje.
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS jugador (
     id_jugador      SERIAL PRIMARY KEY,
     nombre          VARCHAR(64)  NOT NULL,
     email           VARCHAR(128) UNIQUE NOT NULL,
     fecha_registro  TIMESTAMP    NOT NULL DEFAULT now(),
-    -- Columna técnica de integración con AzerothCore (no está en el
-    -- modelo lógico del drawio).
+    -- Columna técnica de integración con AzerothCore.
+    -- No pertenece al modelo lógico 2.1.
     wow_account_id  INTEGER UNIQUE
 );
 
 -- ------------------------------------------------------------
--- 2. PERSONAJE (módulo auth)
+-- auth · PERSONAJE
+-- PK: id_personaje
+-- FK: id_jugador -> jugador.id_jugador (ON DELETE CASCADE)
+-- UK: nombre
+-- Cardinalidad:
+--   N personajes pertenecen a 1 jugador.
+--   1 personaje publica N subastas (subasta.id_vendedor).
+--   1 personaje realiza N pujas (puja.id_comprador).
+--   1 personaje compra N transacciones (transaccion.id_comprador).
+--   1 personaje recibe N correos (correo.id_destinatario).
+--   N personajes poseen M ítems mediante inventario.
+-- Reglas: nivel >= 1 y oro >= 0.
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS personaje (
     id_personaje SERIAL PRIMARY KEY,
@@ -29,12 +53,23 @@ CREATE TABLE IF NOT EXISTS personaje (
     clase        VARCHAR(30),
     oro          NUMERIC(12,2) NOT NULL DEFAULT 0,
     -- GUID del personaje en acore_characters.characters.
+    -- No pertenece al modelo lógico 2.1.
     wow_guid     INTEGER UNIQUE,
     CONSTRAINT ck_personaje_nivel_oro CHECK (nivel >= 1 AND oro >= 0)
 );
 
+-- ============================================================
+-- MÓDULO inventory — Catálogo de ítems e inventario
+-- Relación: PERSONAJE (N) ──< INVENTARIO >── (M) ITEM
+-- ============================================================
+
 -- ------------------------------------------------------------
--- 3. ITEM (módulo restaurant)
+-- inventory · ITEM
+-- PK: id_item
+-- Cardinalidad:
+--   1 ítem puede estar en N inventarios.
+--   1 ítem puede publicarse en N subastas (subasta.id_item).
+--   1 ítem puede adjuntarse a N correos (correo.id_item).
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS item (
     id_item         SERIAL PRIMARY KEY,
@@ -43,11 +78,18 @@ CREATE TABLE IF NOT EXISTS item (
     nivel_requerido INTEGER DEFAULT 1,
     precio_base     NUMERIC(10,2) DEFAULT 0,
     -- entry de acore_world.item_template.
+    -- No pertenece al modelo lógico 2.1.
     wow_entry       INTEGER UNIQUE
 );
 
 -- ------------------------------------------------------------
--- 4. INVENTARIO (módulo restaurant)
+-- inventory · INVENTARIO
+-- PK: id_inventario
+-- FK: id_personaje -> personaje.id_personaje (ON DELETE CASCADE)
+-- FK: id_item      -> item.id_item           (ON DELETE CASCADE)
+-- UK: (id_personaje, id_item)
+-- Cardinalidad: resuelve la relación N:M entre personaje e ítem.
+-- Regla: cantidad > 0.
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS inventario (
     id_inventario SERIAL PRIMARY KEY,
@@ -58,8 +100,24 @@ CREATE TABLE IF NOT EXISTS inventario (
     CONSTRAINT ck_inventario_cantidad CHECK (cantidad > 0)
 );
 
+-- ============================================================
+-- MÓDULO auction — Subastas y pujas
+-- Relación: SUBASTA (1) ──< (N) PUJA
+-- ============================================================
+
 -- ------------------------------------------------------------
--- 5. SUBASTA (módulo order)
+-- auction · SUBASTA
+-- PK: id_subasta
+-- FK: id_vendedor -> personaje.id_personaje (ON DELETE CASCADE)
+-- FK: id_item     -> item.id_item           (ON DELETE CASCADE)
+-- Cardinalidad:
+--   N subastas pertenecen a 1 personaje vendedor.
+--   N subastas ofrecen 1 ítem.
+--   1 subasta recibe N pujas.
+--   1 subasta origina 1 transacción, 1 depósito y 1 comisión.
+-- Reglas:
+--   duracion_horas IN (2, 8, 24)
+--   estado IN (activa, vendida, expirada, cancelada)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS subasta (
     id_subasta            SERIAL PRIMARY KEY,
@@ -79,7 +137,14 @@ CREATE TABLE IF NOT EXISTS subasta (
 );
 
 -- ------------------------------------------------------------
--- 6. PUJA (módulo order)
+-- auction · PUJA
+-- PK: id_puja
+-- FK: id_subasta   -> subasta.id_subasta    (ON DELETE CASCADE)
+-- FK: id_comprador -> personaje.id_personaje (ON DELETE CASCADE)
+-- Cardinalidad:
+--   N pujas pertenecen a 1 subasta.
+--   N pujas son realizadas por 1 personaje comprador.
+-- Regla: estado IN (activa, superada, ganadora).
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS puja (
     id_puja      SERIAL PRIMARY KEY,
@@ -93,8 +158,17 @@ CREATE TABLE IF NOT EXISTS puja (
     )
 );
 
+-- ============================================================
+-- MÓDULO finance — Depósitos, comisiones y transacciones
+-- Cada entidad se relaciona 1:1 con SUBASTA.
+-- ============================================================
+
 -- ------------------------------------------------------------
--- 7. DEPOSITO (módulo payment)
+-- finance · DEPOSITO
+-- PK: id_deposito
+-- FK: id_subasta -> subasta.id_subasta (ON DELETE CASCADE)
+-- UK: id_subasta (relación 1:1)
+-- Regla: garantía pagada por el vendedor al publicar.
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS deposito (
     id_deposito SERIAL PRIMARY KEY,
@@ -105,7 +179,11 @@ CREATE TABLE IF NOT EXISTS deposito (
 );
 
 -- ------------------------------------------------------------
--- 8. COMISION (módulo payment)
+-- finance · COMISION
+-- PK: id_comision
+-- FK: id_subasta -> subasta.id_subasta (ON DELETE CASCADE)
+-- UK: id_subasta (relación 1:1)
+-- Regla: comisión que cobra la casa de subastas al cerrar la venta.
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS comision (
     id_comision SERIAL PRIMARY KEY,
@@ -116,7 +194,13 @@ CREATE TABLE IF NOT EXISTS comision (
 );
 
 -- ------------------------------------------------------------
--- 9. TRANSACCION (módulo payment)
+-- finance · TRANSACCION
+-- PK: id_transaccion
+-- FK: id_subasta   -> subasta.id_subasta     (ON DELETE CASCADE)
+-- FK: id_comprador -> personaje.id_personaje (ON DELETE CASCADE)
+-- UK: id_subasta (relación 1:1 con la subasta)
+-- Cardinalidad: N transacciones son realizadas por 1 personaje.
+-- Regla: tipo IN (puja_ganadora, compra_directa).
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS transaccion (
     id_transaccion SERIAL PRIMARY KEY,
@@ -130,8 +214,20 @@ CREATE TABLE IF NOT EXISTS transaccion (
     )
 );
 
+-- ============================================================
+-- MÓDULO mail — Correo del personaje
+-- Relación: PERSONAJE (1) ──< (N) CORREO >── (0..1) ITEM
+-- ============================================================
+
 -- ------------------------------------------------------------
--- 10. CORREO (módulo payment)
+-- mail · CORREO
+-- PK: id_correo
+-- FK: id_destinatario -> personaje.id_personaje (ON DELETE CASCADE)
+-- FK: id_item         -> item.id_item           (ON DELETE SET NULL)
+-- Cardinalidad:
+--   N correos pertenecen a 1 personaje destinatario.
+--   N correos pueden adjuntar 1 ítem; id_item admite NULL.
+-- Regla: estado IN (pendiente, leido, cobrado, devuelto).
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS correo (
     id_correo       SERIAL PRIMARY KEY,
@@ -147,9 +243,9 @@ CREATE TABLE IF NOT EXISTS correo (
     )
 );
 
--- ------------------------------------------------------------
--- Índices de apoyo
--- ------------------------------------------------------------
+-- ============================================================
+-- Índices de apoyo (no forman parte de las relaciones del modelo)
+-- ============================================================
 CREATE INDEX IF NOT EXISTS idx_personaje_jugador ON personaje(id_jugador);
 CREATE INDEX IF NOT EXISTS idx_inventario_personaje ON inventario(id_personaje);
 CREATE INDEX IF NOT EXISTS idx_subasta_estado ON subasta(estado);
@@ -157,115 +253,3 @@ CREATE INDEX IF NOT EXISTS idx_subasta_fin ON subasta(fecha_fin);
 CREATE INDEX IF NOT EXISTS idx_puja_subasta ON puja(id_subasta);
 CREATE INDEX IF NOT EXISTS idx_puja_comprador ON puja(id_comprador);
 CREATE INDEX IF NOT EXISTS idx_correo_destinatario ON correo(id_destinatario);
-
--- ============================================================
--- DATOS INICIALES (idempotentes)
--- ============================================================
-
-INSERT INTO jugador (nombre, email) VALUES
-    ('Luis',    'luis@example.com'),
-    ('Aracely', 'aracely@example.com')
-ON CONFLICT (email) DO NOTHING;
-
-INSERT INTO personaje (id_jugador, nombre, nivel, clase, oro)
-SELECT j.id_jugador, 'Luis', 80, 'Paladin', 10000.00
-FROM jugador j
-WHERE j.email = 'luis@example.com'
-  AND NOT EXISTS (SELECT 1 FROM personaje p WHERE p.nombre = 'Luis');
-
-INSERT INTO personaje (id_jugador, nombre, nivel, clase, oro)
-SELECT j.id_jugador, 'Aracely', 1, 'Mage', 5000.00
-FROM jugador j
-WHERE j.email = 'aracely@example.com'
-  AND NOT EXISTS (SELECT 1 FROM personaje p WHERE p.nombre = 'Aracely');
-
-INSERT INTO item (nombre, rareza, nivel_requerido, precio_base)
-SELECT 'Espada de fuego', 'epica', 60, 500.00
-WHERE NOT EXISTS (SELECT 1 FROM item WHERE nombre = 'Espada de fuego');
-
-INSERT INTO item (nombre, rareza, nivel_requerido, precio_base)
-SELECT 'Poción de maná', 'comun', 1, 5.00
-WHERE NOT EXISTS (SELECT 1 FROM item WHERE nombre = 'Poción de maná');
-
-INSERT INTO item (nombre, rareza, nivel_requerido, precio_base)
-SELECT 'Tela de lino', 'comun', 1, 2.00
-WHERE NOT EXISTS (SELECT 1 FROM item WHERE nombre = 'Tela de lino');
-
-INSERT INTO inventario (id_personaje, id_item, cantidad)
-SELECT p.id_personaje, i.id_item, 2
-FROM personaje p, item i
-WHERE p.nombre = 'Luis'
-  AND i.nombre = 'Espada de fuego'
-  AND NOT EXISTS (
-      SELECT 1 FROM inventario inv
-      WHERE inv.id_personaje = p.id_personaje AND inv.id_item = i.id_item
-  );
-
-INSERT INTO inventario (id_personaje, id_item, cantidad)
-SELECT p.id_personaje, i.id_item, 10
-FROM personaje p, item i
-WHERE p.nombre = 'Aracely'
-  AND i.nombre = 'Poción de maná'
-  AND NOT EXISTS (
-      SELECT 1 FROM inventario inv
-      WHERE inv.id_personaje = p.id_personaje AND inv.id_item = i.id_item
-  );
-
--- Material extra para el ejemplo de publicación de la API.
-INSERT INTO inventario (id_personaje, id_item, cantidad)
-SELECT p.id_personaje, i.id_item, 5
-FROM personaje p, item i
-WHERE p.nombre = 'Luis'
-  AND i.nombre = 'Tela de lino'
-  AND NOT EXISTS (
-      SELECT 1 FROM inventario inv
-      WHERE inv.id_personaje = p.id_personaje AND inv.id_item = i.id_item
-  );
-
--- Subasta de ejemplo (opcional).
--- La CTE solo descuenta el ítem si la subasta se insertó de verdad,
--- así el seed es idempotente.
-WITH nueva AS (
-    INSERT INTO subasta (
-        id_vendedor, id_item, cantidad, precio_salida,
-        precio_compra_directa, duracion_horas, estado, fecha_fin
-    )
-    SELECT p.id_personaje, i.id_item, 1, 100.00, 250.00, 24, 'activa',
-           now() + interval '24 hours'
-    FROM personaje p, item i
-    WHERE p.nombre = 'Luis'
-      AND i.nombre = 'Espada de fuego'
-      AND NOT EXISTS (
-          SELECT 1 FROM subasta s
-          WHERE s.id_vendedor = p.id_personaje
-            AND s.id_item = i.id_item
-            AND s.estado = 'activa'
-      )
-    RETURNING id_vendedor, id_item
-)
-UPDATE inventario inv
-SET cantidad = inv.cantidad - 1
-FROM nueva n
-WHERE inv.id_personaje = n.id_vendedor
-  AND inv.id_item = n.id_item
-  AND inv.cantidad > 0;
-
--- Depósito de la subasta de ejemplo (5% de 100 = 5).
--- La CTE solo descuenta el oro si el depósito se insertó de verdad.
-WITH dep AS (
-    INSERT INTO deposito (id_subasta, monto, pagado)
-    SELECT s.id_subasta, 5.00, true
-    FROM subasta s
-    WHERE s.id_vendedor = (SELECT id_personaje FROM personaje WHERE nombre = 'Luis')
-      AND s.id_item = (SELECT id_item FROM item WHERE nombre = 'Espada de fuego')
-      AND s.estado = 'activa'
-      AND NOT EXISTS (
-          SELECT 1 FROM deposito d WHERE d.id_subasta = s.id_subasta
-      )
-    RETURNING id_subasta
-)
-UPDATE personaje p
-SET oro = p.oro - 5.00
-FROM subasta s
-JOIN dep ON dep.id_subasta = s.id_subasta
-WHERE p.id_personaje = s.id_vendedor;

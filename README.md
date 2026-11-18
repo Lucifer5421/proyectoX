@@ -8,7 +8,7 @@ nuevo con las mismas capas y los componentes necesarios.
 - **Dominio:** subastas de WoW (vendedor, comprador/postor, casa de subastas, correo).
 - **Arquitectura:** monolito modular DDD: `domain` → `application` → `infrastructure` → `presentation`.
 - **Stack:** Python 3.11, FastAPI, SQLAlchemy 2, PostgreSQL 15, Docker Compose.
-- **Modelo ER:** `docs/modelo_subastas_2.1.drawio` (2 páginas: conceptual y lógico).
+- **Modelo ER:** `docs/modelo_subastas_2.1.drawio` (3 páginas: conceptual, lógico y módulos).
 
 ---
 
@@ -17,7 +17,7 @@ nuevo con las mismas capas y los componentes necesarios.
 | Pregunta | Decisión | Motivo |
 |---|---|---|
 | ¿PostgreSQL aparte o MySQL integrado al WoW? | **PostgreSQL aparte** | Sigue el molde, aísla el riesgo y permite demostrar sin tocar el servidor WoW. |
-| ¿Solo subastas o varios módulos? | **Cinco módulos con estructura de delivery: `auth`, `restaurant`, `order`, `payment` y `tracking`** | Se conservan los nombres de delivery; `restaurant` aloja ítems, `order` subastas, `payment` finanzas y `tracking` queda vacío. |
+| ¿Solo subastas o varios módulos? | **Cinco módulos propios del modelo 2.1: `auth`, `inventory`, `auction`, `finance` y `mail`** | Los nombres salen del dominio de subastas: `inventory` aloja ítems, `auction` subastas, `finance` movimientos económicos y `mail` el correo. |
 | ¿Solo BD, API o todo? | **Todo: BD + API + presentación + documentación** | El molde incluye las 4 capas y la transcripción pide completar módulos. |
 | ¿`mod-auctionsim` entra en la entrega? | **Opcional, fuera de la entrega principal** | Es C++ de AzerothCore y requiere recompilar; la entrega se cubre con BD + API. |
 
@@ -35,7 +35,7 @@ proyectoX/
 ├── .gitignore
 ├── Dockerfile
 ├── docker-compose.yml
-├── init.sql                     # DDL + seed para el contenedor PostgreSQL
+├── init.sql                     # DDL puro para el contenedor PostgreSQL
 ├── requirements.txt
 ├── docs/
 │   ├── decisiones_alcance.md    # respuestas a las 4 preguntas
@@ -46,7 +46,7 @@ proyectoX/
 │   ├── modelo_logico_subastas.png
 │   ├── modelo_subastas_2.1.pdf
 │   ├── integracion_wow.md       # sync de solo lectura con AzerothCore
-│   ├── estructura_modulos.md    # mapeo delivery -> proyectoX y capas DDD
+│   ├── estructura_modulos.md    # mapeo modelo 2.1 -> módulos y capas DDD
 │   └── reglas_negocio.md
 ├── sql/
 │   ├── 01_schema.sql            # DDL del modelo lógico 2.1
@@ -82,7 +82,7 @@ proyectoX/
 │       │   └── presentation/
 │       │       ├── capa_exposicion.txt
 │       │       └── router.py
-│       ├── restaurant/          # item e inventario personaje-ítem
+│       ├── inventory/           # item e inventario personaje-ítem
 │       │   ├── application/
 │       │   │   ├── dtos.py
 │       │   │   └── services.py
@@ -97,24 +97,7 @@ proyectoX/
 │       │   ├── presentation/
 │       │   │   └── router.py
 │       │   └── __init__.py
-│       ├── order/               # subasta y puja
-│       │   ├── application/
-│       │   │   ├── dtos.py
-│       │   │   └── services.py
-│       │   ├── domain/
-│       │   │   ├── exceptions.py
-│       │   │   ├── models.py
-│       │   │   └── repositories.py
-│       │   ├── infrastructure/
-│       │   │   ├── external_adapters.py
-│       │   │   ├── models_db.py
-│       │   │   └── repository_impl.py
-│       │   ├── presentation/
-│       │   │   └── router.py
-│       │   ├── __init__.py
-│       │   ├── models.py        # vacío: los modelos viven en domain/
-│       │   └── services.py      # vacío: los casos de uso viven en application/
-│       ├── payment/             # depósito, comisión, transacción y correo
+│       ├── auction/             # subasta y puja
 │       │   ├── application/
 │       │   │   ├── dtos.py
 │       │   │   └── services.py
@@ -129,7 +112,19 @@ proyectoX/
 │       │   ├── presentation/
 │       │   │   └── router.py
 │       │   └── __init__.py
-│       └── tracking/            # sin equivalente: archivos vacíos
+│       ├── finance/             # depósito, comisión y transacción
+│       │   ├── application/
+│       │   │   └── services.py
+│       │   ├── domain/
+│       │   │   ├── exceptions.py
+│       │   │   ├── models.py
+│       │   │   └── repositories.py
+│       │   ├── infrastructure/
+│       │   │   ├── external_adapters.py
+│       │   │   ├── models_db.py
+│       │   │   └── repository_impl.py
+│       │   └── __init__.py
+│       └── mail/                # correo del personaje
 │           ├── application/
 │           │   ├── dtos.py
 │           │   └── services.py
@@ -145,8 +140,8 @@ proyectoX/
 │           │   └── router.py
 │           └── __init__.py
 ├── tests/
+│   ├── test_auction.py
 │   ├── test_modules.py
-│   ├── test_order.py
 │   ├── test_structure.py
 │   └── test_wow_sync.py
 └── wow-server/                  # stack WoW custom (sanitizado)
@@ -160,12 +155,12 @@ proyectoX/
     └── docs/
 ```
 
-Los cinco módulos conservan los nombres y la estructura de
-`delivery-monolith`: `auth`, `restaurant`, `order`, `payment` y `tracking`.
-El contenido es el dominio de subastas de WoW: `restaurant` aloja el catálogo
-de ítems, `order` las subastas y pujas, y `payment` las finanzas. `tracking`
-queda vacío porque proyectoX no tiene reparto. El mapeo, los archivos en
-blanco y las reglas de dependencia están en
+Los cinco módulos se organizan con las capas de `delivery-monolith`, pero con
+los nombres del dominio de subastas: `auth` (`jugador`, `personaje`),
+`inventory` (`item`, `inventario`), `auction` (`subasta`, `puja`), `finance`
+(`deposito`, `comision`, `transaccion`) y `mail` (`correo`). `finance` es un
+módulo interno: no expone endpoints y su servicio se usa desde `auction`. El
+mapeo completo, las relaciones y las reglas de dependencia están en
 [`docs/estructura_modulos.md`](docs/estructura_modulos.md).
 
 ---
@@ -185,6 +180,10 @@ docker compose up -d --build
 
 La API queda en `http://localhost:8002` y Swagger en
 `http://localhost:8002/docs`.
+
+> En el primer arranque, PostgreSQL ejecuta `init.sql` (DDL puro) y después
+> `sql/02_seed.sql` (datos de demostración). Si el volumen ya existe, no se
+> vuelven a ejecutar.
 
 ### 2. Verificar
 
@@ -307,18 +306,19 @@ curl http://localhost:8002/mail/2
 - **Lógico:** tablas, PK/FK, tipos y restricciones.
 
 Abre `docs/modelo_subastas_2.1.drawio` en [diagrams.net](https://app.diagrams.net/)
-o en VS Code con la extensión Draw.io. Tiene dos páginas:
+o en VS Code con la extensión Draw.io. Tiene tres páginas:
 
 1. `modelo conceptual subastas`
 2. `modelo logico subastas`
+3. `modulos` (tabla entidad → módulo)
 
-El modelo 2.1 se refleja en los módulos con nombres de delivery: `auth`
-(`jugador`, `personaje`), `restaurant` (`item`, `inventario`), `order`
-(`subasta`, `puja`) y `payment` (`deposito`, `comision`, `transaccion`,
-`correo`). `tracking` se conserva vacío porque no hay reparto en proyectoX.
-`jugador` no guarda oro (vive en `personaje`), `personaje.nombre` es único,
-`transaccion` no repite `id_vendedor` (se deduce de `subasta`) y
-`correo.estado` usa `pendiente`, `leido`, `cobrado` o `devuelto`.
+El modelo 2.1 se refleja en los módulos del dominio: `auth` (`jugador`,
+`personaje`), `inventory` (`item`, `inventario`), `auction` (`subasta`,
+`puja`), `finance` (`deposito`, `comision`, `transaccion`) y `mail`
+(`correo`). `jugador` no guarda oro (vive en `personaje`), `personaje.nombre`
+es único, `transaccion` no repite `id_vendedor` (se deduce de `subasta`) y
+`correo.estado` usa `pendiente`, `leido`, `cobrado` o `devuelto`. Cada tabla
+del DDL indica su módulo, su PK, sus FK y su cardinalidad.
 
 También hay exportaciones listas para revisar:
 - `docs/modelo_conceptual_subastas.png`
@@ -358,9 +358,9 @@ pytest -q
 
 Las pruebas cubren reglas puras del dominio (duración, pujas, compra
 directa, depósito, comisión, cierre y expiración), las entidades de
-`auth`/`restaurant`/`payment` (`tests/test_modules.py`), el
+`auth`/`inventory`/`finance`/`mail` (`tests/test_modules.py`), el
 mapeo/sincronización de WoW (`tests/test_wow_sync.py`) y la estructura
-modular exigida (`tests/test_structure.py`), sin necesitar PostgreSQL ni
+modular y el DDL puro (`tests/test_structure.py`), sin necesitar PostgreSQL ni
 MySQL.
 
 ---

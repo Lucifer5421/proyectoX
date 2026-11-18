@@ -1,4 +1,4 @@
-"""Pruebas puras de los módulos auth, restaurant y payment.
+"""Pruebas puras de los módulos auth, inventory, finance y mail.
 
 No requieren PostgreSQL: validan entidades y reglas del modelo 2.1.
 """
@@ -8,13 +8,17 @@ from decimal import Decimal
 import pytest
 
 from src.modules.auth.domain.models import Jugador, Personaje
-from src.modules.payment.domain.models import (
-    Correo,
-    EstadoCorreo,
+from src.modules.finance.domain.models import (
+    Comision,
+    Deposito,
     TipoTransaccion,
     Transaccion,
 )
-from src.modules.restaurant.domain.models import Inventario, Item
+from src.modules.inventory.domain.models import Inventario, Item
+from src.modules.mail.domain.models import (
+    Correo,
+    EstadoCorreo,
+)
 
 
 def test_jugador_no_guarda_oro():
@@ -66,7 +70,29 @@ def test_transaccion_usa_tipo_del_modelo():
     assert TipoTransaccion.COMPRA_DIRECTA.value == "compra_directa"
 
 
-def test_correo_estados_del_modelo():
+def test_deposito_y_comision_validan_montos():
+    deposito = Deposito(id_subasta=1, monto=Decimal("5.00"))
+    comision = Comision(
+        id_subasta=1,
+        porcentaje=Decimal("5.00"),
+        monto=Decimal("10.00"),
+    )
+
+    assert deposito.pagado is False
+    assert comision.porcentaje == Decimal("5.00")
+
+    with pytest.raises(ValueError):
+        Deposito(id_subasta=1, monto=Decimal("-1"))
+
+    with pytest.raises(ValueError):
+        Comision(
+            id_subasta=1,
+            porcentaje=Decimal("101"),
+            monto=Decimal("10.00"),
+        )
+
+
+def test_correo_estados_y_validaciones_del_modelo():
     correo = Correo(
         id_destinatario=2,
         asunto="Subasta ganada: item 6",
@@ -81,3 +107,13 @@ def test_correo_estados_del_modelo():
         "cobrado",
         "devuelto",
     }
+
+    with pytest.raises(ValueError):
+        Correo(id_destinatario=2, asunto="")
+
+    with pytest.raises(ValueError):
+        Correo(
+            id_destinatario=2,
+            asunto="Correo inválido",
+            cantidad=-1,
+        )

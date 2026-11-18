@@ -2,21 +2,21 @@ from fastapi import FastAPI
 
 from src.core.database import Base, engine
 
-# Importar los modelos ORM antes de create_all. Se respeta el orden de las
-# llaves foráneas y el mismo orden de módulos que delivery-monolith:
-# auth, restaurant, tracking, order y payment.
+# Importar los modelos ORM antes de create_all. El orden respeta las llaves
+# foráneas del modelo lógico 2.1:
+#   auth -> inventory -> auction -> finance -> mail
 import src.modules.auth.infrastructure.models_db  # noqa: F401
-import src.modules.restaurant.infrastructure.models_db  # noqa: F401
-import src.modules.tracking.infrastructure.models_db  # noqa: F401
-import src.modules.order.infrastructure.models_db  # noqa: F401
-import src.modules.payment.infrastructure.models_db  # noqa: F401
+import src.modules.inventory.infrastructure.models_db  # noqa: F401
+import src.modules.auction.infrastructure.models_db  # noqa: F401
+import src.modules.finance.infrastructure.models_db  # noqa: F401
+import src.modules.mail.infrastructure.models_db  # noqa: F401
 
 from src.modules.auth.presentation.router import router as auth_router
-from src.modules.restaurant.presentation.router import (
-    router as restaurant_router,
+from src.modules.inventory.presentation.router import (
+    router as inventory_router,
 )
-from src.modules.order.presentation.router import router as order_router
-from src.modules.payment.presentation.router import router as payment_router
+from src.modules.auction.presentation.router import router as auction_router
+from src.modules.mail.presentation.router import router as mail_router
 
 # create_all es idempotente: si init.sql ya creó las tablas, no hace nada.
 Base.metadata.create_all(bind=engine)
@@ -26,14 +26,14 @@ app = FastAPI(
     version="1.0.0",
     description=(
         "Monolito modular DDD para subastas de World of Warcraft. "
-        "Módulos internos: auth, restaurant, order, payment y tracking."
+        "Módulos internos: auth, inventory, auction, finance y mail."
     ),
 )
 
 app.include_router(auth_router)
-app.include_router(restaurant_router)
-app.include_router(order_router)
-app.include_router(payment_router)
+app.include_router(inventory_router)
+app.include_router(auction_router)
+app.include_router(mail_router)
 
 
 @app.get("/")
@@ -43,9 +43,9 @@ def health_check():
         "architecture": "Modular DDD (Domain-Driven Design)",
         "modules": [
             "auth",
-            "restaurant",
-            "order",
-            "payment",
-            "tracking",
+            "inventory",
+            "auction",
+            "finance",
+            "mail",
         ],
     }

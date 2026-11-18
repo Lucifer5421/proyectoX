@@ -107,18 +107,18 @@ erDiagram
 
 ## Restricciones principales
 
-| Tabla | Restricción |
-|---|---|
-| `jugador` | `email` UNIQUE; `fecha_registro` NOT NULL DEFAULT now(); `wow_account_id` UNIQUE (NULL permitido). |
-| `personaje` | FK `id_jugador` ON DELETE CASCADE; `nombre` UNIQUE; `nivel >= 1`; `oro >= 0`; `wow_guid` UNIQUE (NULL permitido). |
-| `item` | `nombre VARCHAR(100)`; `wow_entry` UNIQUE (NULL permitido). |
-| `inventario` | FK `id_personaje`, FK `id_item`; `(id_personaje, id_item)` UNIQUE; `cantidad > 0`. |
-| `subasta` | `duracion_horas IN (2,8,24)`; `estado IN ('activa','vendida','expirada','cancelada')`; FK `id_vendedor`, FK `id_item`; `precio_salida > 0` (validado en aplicación). |
-| `puja` | FK `id_subasta`, FK `id_comprador`; `estado IN ('activa','superada','ganadora')`; `monto > 0` (validado en aplicación). |
-| `deposito` | `id_subasta` UNIQUE (1:1). |
-| `comision` | `id_subasta` UNIQUE (1:1). |
-| `transaccion` | `id_subasta` UNIQUE (1:1); FK `id_comprador`; `tipo IN ('puja_ganadora','compra_directa')`; el vendedor se deduce de `subasta`. |
-| `correo` | FK `id_destinatario`, FK `id_item` ON DELETE SET NULL; `estado IN ('pendiente','leido','cobrado','devuelto')`. |
+| Tabla | Módulo | Restricción |
+|---|---|---|
+| `jugador` | `auth` | `email` UNIQUE; `fecha_registro` NOT NULL DEFAULT now(); `wow_account_id` UNIQUE (NULL permitido). |
+| `personaje` | `auth` | FK `id_jugador` ON DELETE CASCADE; `nombre` UNIQUE; `nivel >= 1`; `oro >= 0`; `wow_guid` UNIQUE (NULL permitido). |
+| `item` | `inventory` | `nombre VARCHAR(100)`; `wow_entry` UNIQUE (NULL permitido). |
+| `inventario` | `inventory` | FK `id_personaje`, FK `id_item`; `(id_personaje, id_item)` UNIQUE; `cantidad > 0`. |
+| `subasta` | `auction` | `duracion_horas IN (2,8,24)`; `estado IN ('activa','vendida','expirada','cancelada')`; FK `id_vendedor`, FK `id_item`; `precio_salida > 0` (validado en aplicación). |
+| `puja` | `auction` | FK `id_subasta`, FK `id_comprador`; `estado IN ('activa','superada','ganadora')`; `monto > 0` (validado en aplicación). |
+| `deposito` | `finance` | `id_subasta` UNIQUE (1:1). |
+| `comision` | `finance` | `id_subasta` UNIQUE (1:1). |
+| `transaccion` | `finance` | `id_subasta` UNIQUE (1:1); FK `id_comprador`; `tipo IN ('puja_ganadora','compra_directa')`; el vendedor se deduce de `subasta`. |
+| `correo` | `mail` | FK `id_destinatario`, FK `id_item` ON DELETE SET NULL; `estado IN ('pendiente','leido','cobrado','devuelto')`. |
 
 > `wow_account_id`, `wow_guid` y `wow_entry` son columnas técnicas de la
 > integración de solo lectura con AzerothCore. No forman parte del modelo

@@ -29,10 +29,10 @@ from src.modules.auth.infrastructure.models_db import (
     JugadorModel,
     PersonajeModel,
 )
-from src.modules.restaurant.infrastructure.external_adapters import (
+from src.modules.inventory.infrastructure.external_adapters import (
     WowInventoryAdapter,
 )
-from src.modules.restaurant.infrastructure.models_db import (
+from src.modules.inventory.infrastructure.models_db import (
     InventarioModel,
     ItemModel,
 )
