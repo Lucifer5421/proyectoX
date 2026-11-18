@@ -8,14 +8,14 @@ import src.modules.auth.infrastructure.models_db  # noqa: F401
 import src.modules.inventory.infrastructure.models_db  # noqa: F401
 import src.modules.auction.infrastructure.models_db  # noqa: F401
 import src.modules.finance.infrastructure.models_db  # noqa: F401
-from src.modules.auction.presentation.router import (
+from src.modules.auction.presentation.routers import (
     router as auction_router,
 )
-from src.modules.auth.presentation.router import router as auth_router
-from src.modules.finance.presentation.router import (
+from src.modules.auth.presentation.routers import router as auth_router
+from src.modules.finance.presentation.routers import (
     router as mail_router,
 )
-from src.modules.inventory.presentation.router import (
+from src.modules.inventory.presentation.routers import (
     router as inventory_router,
 )
 

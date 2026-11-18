@@ -46,6 +46,7 @@ proyectoX/
 │   ├── modelo_logico_subastas.png
 │   ├── modelo_subastas_2.1.pdf
 │   ├── integracion_wow.md       # sync de solo lectura con AzerothCore
+│   ├── estructura_modulos.md    # mapeo delivery -> proyectoX y capas DDD
 │   └── reglas_negocio.md
 ├── sql/
 │   ├── 01_schema.sql            # DDL del modelo lógico 2.1
@@ -65,59 +66,68 @@ proyectoX/
 │   └── modules/
 │       ├── auth/                # jugador, personaje y oro del personaje
 │       │   ├── domain/
+│       │   │   ├── exceptions.py
 │       │   │   ├── models.py
-│       │   │   ├── repositories.py
-│       │   │   └── exceptions.py
+│       │   │   └── repositories.py
 │       │   ├── application/
+│       │   │   ├── datos.py
 │       │   │   └── services.py
 │       │   ├── infrastructure/
+│       │   │   ├── external_adapter.py
 │       │   │   ├── models_db.py
-│       │   │   └── repository_impl.py
+│       │   │   └── repositories_impl.py
 │       │   └── presentation/
-│       │       ├── dtos.py
-│       │       └── router.py
+│       │       ├── routers.py
+│       │       └── schemas.py
 │       ├── inventory/           # item e inventario personaje-ítem
 │       │   ├── domain/
+│       │   │   ├── exceptions.py
 │       │   │   ├── models.py
-│       │   │   ├── repositories.py
-│       │   │   └── exceptions.py
+│       │   │   └── repositories.py
 │       │   ├── application/
+│       │   │   ├── datos.py
 │       │   │   └── services.py
 │       │   ├── infrastructure/
+│       │   │   ├── external_adapter.py
 │       │   │   ├── models_db.py
-│       │   │   └── repository_impl.py
+│       │   │   └── repositories_impl.py
 │       │   └── presentation/
-│       │       ├── dtos.py
-│       │       └── router.py
+│       │       ├── routers.py
+│       │       └── schemas.py
 │       ├── auction/             # subasta y puja
 │       │   ├── domain/
+│       │   │   ├── exceptions.py
 │       │   │   ├── models.py
-│       │   │   ├── repositories.py
-│       │   │   └── exceptions.py
+│       │   │   └── repositories.py
 │       │   ├── application/
-│       │   │   ├── dtos.py
+│       │   │   ├── datos.py
 │       │   │   └── services.py
 │       │   ├── infrastructure/
+│       │   │   ├── external_adapter.py
 │       │   │   ├── models_db.py
-│       │   │   └── repository_impl.py
+│       │   │   └── repositories_impl.py
 │       │   └── presentation/
-│       │       └── router.py
+│       │       ├── routers.py
+│       │       └── schemas.py
 │       └── finance/             # depósito, comisión, transacción y correo
 │           ├── domain/
+│           │   ├── exceptions.py
 │           │   ├── models.py
-│           │   ├── repositories.py
-│           │   └── exceptions.py
+│           │   └── repositories.py
 │           ├── application/
-│           │   ├── dtos.py
+│           │   ├── datos.py
 │           │   └── services.py
 │           ├── infrastructure/
+│           │   ├── external_adapter.py
 │           │   ├── models_db.py
-│           │   └── repository_impl.py
+│           │   └── repositories_impl.py
 │           └── presentation/
-│               └── router.py
+│               ├── routers.py
+│               └── schemas.py
 ├── tests/
 │   ├── test_auction.py
 │   ├── test_modules.py
+│   ├── test_structure.py
 │   └── test_wow_sync.py
 └── wow-server/                  # stack WoW custom (sanitizado)
     ├── README.md
@@ -129,6 +139,12 @@ proyectoX/
     ├── sql/
     └── docs/
 ```
+
+Todos los módulos respetan la misma estructura de capas: `domain`,
+`application`, `infrastructure` y `presentation`. El mapeo desde los módulos
+de `delivery-monolith` (incluido `restaurant` → `inventory`) y las reglas de
+dependencia están en
+[`docs/estructura_modulos.md`](docs/estructura_modulos.md).
 
 ---
 
@@ -317,11 +333,12 @@ pip install -r requirements.txt
 pytest -q
 ```
 
-Las 20 pruebas cubren reglas puras del dominio (duración, pujas, compra
+Las 24 pruebas cubren reglas puras del dominio (duración, pujas, compra
 directa, depósito, comisión, cierre y expiración), las entidades de
-`auth`/`inventory`/`finance` (`tests/test_modules.py`) y el
-mapeo/sincronización de WoW (`tests/test_wow_sync.py`), sin necesitar
-PostgreSQL ni MySQL.
+`auth`/`inventory`/`finance` (`tests/test_modules.py`), el
+mapeo/sincronización de WoW (`tests/test_wow_sync.py`) y la estructura
+modular exigida (`tests/test_structure.py`), sin necesitar PostgreSQL ni
+MySQL.
 
 ---
 

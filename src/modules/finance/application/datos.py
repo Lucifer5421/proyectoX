@@ -1,4 +1,4 @@
-"""DTOs de salida del módulo finance."""
+"""Contratos de datos (DTO) de salida del módulo finance."""
 
 from datetime import datetime
 from decimal import Decimal

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from src.core.database import get_db
 from src.modules.auth.application.services import AuthService
-from src.modules.auth.presentation.dtos import JugadorOut, PersonajeOut
+from src.modules.auth.presentation.schemas import JugadorOut, PersonajeOut
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 

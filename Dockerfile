@@ -18,6 +18,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./src ./src
+# init.sql vive en la raíz del proyecto (no dentro de src/core).
+COPY ./init.sql ./init.sql
 
 EXPOSE 8002
 

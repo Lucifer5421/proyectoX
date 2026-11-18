@@ -13,7 +13,7 @@ from src.modules.finance.domain.models import (
     TipoTransaccion,
     Transaccion,
 )
-from src.modules.finance.infrastructure.repository_impl import (
+from src.modules.finance.infrastructure.repositories_impl import (
     ComisionRepositoryImpl,
     CorreoRepositoryImpl,
     DepositoRepositoryImpl,

@@ -1,4 +1,4 @@
-"""DTOs de entrada y salida del módulo de subastas."""
+"""Contratos de datos (DTO) de entrada y salida del módulo auction."""
 
 from datetime import datetime
 from decimal import Decimal

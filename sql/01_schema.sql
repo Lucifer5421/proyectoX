@@ -1,8 +1,12 @@
 -- ============================================================
 -- ProyectoX — Subastas WoW
 -- 01_schema.sql: DDL del modelo lógico 2.1 (PostgreSQL 15)
+-- Las tablas están agrupadas por módulo funcional.
 -- ============================================================
 
+-- ------------------------------------------------------------
+-- Módulo auth: jugador y personaje
+-- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS jugador (
     id_jugador      SERIAL PRIMARY KEY,
     nombre          VARCHAR(64)  NOT NULL,
@@ -22,6 +26,9 @@ CREATE TABLE IF NOT EXISTS personaje (
     CONSTRAINT ck_personaje_nivel_oro CHECK (nivel >= 1 AND oro >= 0)
 );
 
+-- ------------------------------------------------------------
+-- Módulo inventory: catálogo de ítems e inventario
+-- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS item (
     id_item         SERIAL PRIMARY KEY,
     nombre          VARCHAR(100) NOT NULL,
@@ -40,6 +47,9 @@ CREATE TABLE IF NOT EXISTS inventario (
     CONSTRAINT ck_inventario_cantidad CHECK (cantidad > 0)
 );
 
+-- ------------------------------------------------------------
+-- Módulo auction: subasta y puja
+-- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS subasta (
     id_subasta            SERIAL PRIMARY KEY,
     id_vendedor           INTEGER NOT NULL REFERENCES personaje(id_personaje) ON DELETE CASCADE,
@@ -69,6 +79,9 @@ CREATE TABLE IF NOT EXISTS puja (
     )
 );
 
+-- ------------------------------------------------------------
+-- Módulo finance: depósito, comisión, transacción y correo
+-- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS deposito (
     id_deposito SERIAL PRIMARY KEY,
     id_subasta  INTEGER NOT NULL UNIQUE REFERENCES subasta(id_subasta) ON DELETE CASCADE,

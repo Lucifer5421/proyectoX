@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from src.modules.inventory.domain.exceptions import ItemNoDisponible
 from src.modules.inventory.domain.models import Inventario, Item
-from src.modules.inventory.infrastructure.repository_impl import (
+from src.modules.inventory.infrastructure.repositories_impl import (
     InventarioRepositoryImpl,
     ItemRepositoryImpl,
 )

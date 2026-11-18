@@ -14,7 +14,7 @@ from src.modules.auth.domain.exceptions import (
     PersonajeNoEncontrado,
 )
 from src.modules.auth.domain.models import Jugador, Personaje
-from src.modules.auth.infrastructure.repository_impl import (
+from src.modules.auth.infrastructure.repositories_impl import (
     JugadorRepositoryImpl,
     PersonajeRepositoryImpl,
 )

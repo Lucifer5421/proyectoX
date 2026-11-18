@@ -1,4 +1,4 @@
-"""DTOs de salida del módulo inventory."""
+"""Contratos de datos (DTO) de salida del módulo inventory."""
 
 from decimal import Decimal
 

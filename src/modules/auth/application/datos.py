@@ -1,4 +1,4 @@
-"""DTOs de salida del módulo auth."""
+"""Contratos de datos (DTO) de salida del módulo auth."""
 
 from datetime import datetime
 from decimal import Decimal

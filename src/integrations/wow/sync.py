@@ -18,16 +18,19 @@ from typing import Any, Dict, List
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
-from src.integrations.wow.client import WowClient
 from src.integrations.wow.config import database_url_for_sync, load_settings
 from src.integrations.wow.mapping import (
     inventario_desde_fila,
     item_desde_fila,
     personaje_desde_fila,
 )
+from src.modules.auth.infrastructure.external_adapter import WowAuthAdapter
 from src.modules.auth.infrastructure.models_db import (
     JugadorModel,
     PersonajeModel,
+)
+from src.modules.inventory.infrastructure.external_adapter import (
+    WowInventoryAdapter,
 )
 from src.modules.inventory.infrastructure.models_db import (
     InventarioModel,
@@ -289,10 +292,11 @@ def main(argv=None) -> None:
             "WOW_DB_PASSWORD."
         )
 
-    client = WowClient(settings)
+    auth_client = WowAuthAdapter(settings)
+    inventory_client = WowInventoryAdapter(settings)
     print(f"Leyendo AzerothCore en {settings.host}:{settings.port} ...")
-    characters = client.fetch_characters()
-    inventory = client.fetch_inventory()
+    characters = auth_client.fetch_characters()
+    inventory = inventory_client.fetch_inventory()
     plan = build_plan(characters, inventory)
     print_plan(plan)
 

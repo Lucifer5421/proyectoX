@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from src.core.database import get_db
-from src.modules.finance.application.dtos import CorreoOut
 from src.modules.finance.application.services import FinanceService
+from src.modules.finance.presentation.schemas import CorreoOut
 
 router = APIRouter(prefix="/mail", tags=["Correo"])
 

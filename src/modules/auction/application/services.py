@@ -10,7 +10,7 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
-from src.modules.auction.application.dtos import (
+from src.modules.auction.application.datos import (
     CompraDirectaIn,
     PublicarSubastaIn,
     PujaIn,
@@ -27,7 +27,7 @@ from src.modules.auction.domain.models import (
     Puja,
     Subasta,
 )
-from src.modules.auction.infrastructure.repository_impl import (
+from src.modules.auction.infrastructure.repositories_impl import (
     PujaRepositoryImpl,
     SubastaRepositoryImpl,
 )

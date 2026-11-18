@@ -37,7 +37,10 @@ solo se cambia `DATABASE_URL` y se adapta el repositorio.
 registros financieros. Separarlos en módulos mantiene el monolito modular DDD,
 evita mezclar responsabilidades y deja el dominio de subastas como eje central.
 No se copian los módulos de delivery (`restaurant`, `order`, `payment`,
-`tracking`) porque pertenecen a otro dominio.
+`tracking`) porque pertenecen a otro dominio. El equivalente funcional de
+`restaurant` (catálogo de productos) es `inventory` en proyectoX; el detalle
+del mapeo y de las capas está en
+[`estructura_modulos.md`](estructura_modulos.md).
 
 ---
 

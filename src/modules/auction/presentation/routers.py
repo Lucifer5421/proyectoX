@@ -6,14 +6,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from src.core.database import get_db
-from src.modules.auction.application.dtos import (
+from src.modules.auction.application.services import AuctionService
+from src.modules.auction.presentation.schemas import (
     CompraDirectaIn,
     PublicarSubastaIn,
     PujaIn,
     PujaOut,
     SubastaOut,
 )
-from src.modules.auction.application.services import AuctionService
 
 router = APIRouter(prefix="/auctions", tags=["Subastas"])
 
