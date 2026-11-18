@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS personaje (
 );
 
 -- ------------------------------------------------------------
--- 3. ITEM (módulo inventory)
+-- 3. ITEM (módulo restaurant)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS item (
     id_item         SERIAL PRIMARY KEY,
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS item (
 );
 
 -- ------------------------------------------------------------
--- 4. INVENTARIO (módulo inventory)
+-- 4. INVENTARIO (módulo restaurant)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS inventario (
     id_inventario SERIAL PRIMARY KEY,
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS inventario (
 );
 
 -- ------------------------------------------------------------
--- 5. SUBASTA (módulo auction)
+-- 5. SUBASTA (módulo order)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS subasta (
     id_subasta            SERIAL PRIMARY KEY,
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS subasta (
 );
 
 -- ------------------------------------------------------------
--- 6. PUJA (módulo auction)
+-- 6. PUJA (módulo order)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS puja (
     id_puja      SERIAL PRIMARY KEY,
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS puja (
 );
 
 -- ------------------------------------------------------------
--- 7. DEPOSITO (módulo finance)
+-- 7. DEPOSITO (módulo payment)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS deposito (
     id_deposito SERIAL PRIMARY KEY,
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS deposito (
 );
 
 -- ------------------------------------------------------------
--- 8. COMISION (módulo finance)
+-- 8. COMISION (módulo payment)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS comision (
     id_comision SERIAL PRIMARY KEY,
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS comision (
 );
 
 -- ------------------------------------------------------------
--- 9. TRANSACCION (módulo finance)
+-- 9. TRANSACCION (módulo payment)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS transaccion (
     id_transaccion SERIAL PRIMARY KEY,
@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS transaccion (
 );
 
 -- ------------------------------------------------------------
--- 10. CORREO (módulo finance)
+-- 10. CORREO (módulo payment)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS correo (
     id_correo       SERIAL PRIMARY KEY,

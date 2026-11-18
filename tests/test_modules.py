@@ -1,4 +1,4 @@
-"""Pruebas puras de los módulos auth, inventory y finance.
+"""Pruebas puras de los módulos auth, restaurant y payment.
 
 No requieren PostgreSQL: validan entidades y reglas del modelo 2.1.
 """
@@ -8,13 +8,13 @@ from decimal import Decimal
 import pytest
 
 from src.modules.auth.domain.models import Jugador, Personaje
-from src.modules.finance.domain.models import (
+from src.modules.payment.domain.models import (
     Correo,
     EstadoCorreo,
     TipoTransaccion,
     Transaccion,
 )
-from src.modules.inventory.domain.models import Inventario, Item
+from src.modules.restaurant.domain.models import Inventario, Item
 
 
 def test_jugador_no_guarda_oro():

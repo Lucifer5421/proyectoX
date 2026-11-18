@@ -24,15 +24,15 @@ from src.integrations.wow.mapping import (
     item_desde_fila,
     personaje_desde_fila,
 )
-from src.modules.auth.infrastructure.external_adapter import WowAuthAdapter
+from src.modules.auth.infrastructure.external_adapters import WowAuthAdapter
 from src.modules.auth.infrastructure.models_db import (
     JugadorModel,
     PersonajeModel,
 )
-from src.modules.inventory.infrastructure.external_adapter import (
+from src.modules.restaurant.infrastructure.external_adapters import (
     WowInventoryAdapter,
 )
-from src.modules.inventory.infrastructure.models_db import (
+from src.modules.restaurant.infrastructure.models_db import (
     InventarioModel,
     ItemModel,
 )

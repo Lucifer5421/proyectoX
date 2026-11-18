@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS personaje (
 );
 
 -- ------------------------------------------------------------
--- Módulo inventory: catálogo de ítems e inventario
+-- Módulo restaurant: catálogo de ítems e inventario
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS item (
     id_item         SERIAL PRIMARY KEY,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS inventario (
 );
 
 -- ------------------------------------------------------------
--- Módulo auction: subasta y puja
+-- Módulo order: subasta y puja
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS subasta (
     id_subasta            SERIAL PRIMARY KEY,
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS puja (
 );
 
 -- ------------------------------------------------------------
--- Módulo finance: depósito, comisión, transacción y correo
+-- Módulo payment: depósito, comisión, transacción y correo
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS deposito (
     id_deposito SERIAL PRIMARY KEY,

@@ -17,7 +17,7 @@ nuevo con las mismas capas y los componentes necesarios.
 | Pregunta | Decisión | Motivo |
 |---|---|---|
 | ¿PostgreSQL aparte o MySQL integrado al WoW? | **PostgreSQL aparte** | Sigue el molde, aísla el riesgo y permite demostrar sin tocar el servidor WoW. |
-| ¿Solo subastas o varios módulos? | **Cuatro módulos: `auth`, `inventory`, `auction`, `finance`** | El modelo 2.1 separa cuentas, inventario, subastas y finanzas; el dominio sigue siendo subastas. |
+| ¿Solo subastas o varios módulos? | **Cinco módulos con estructura de delivery: `auth`, `restaurant`, `order`, `payment` y `tracking`** | Se conservan los nombres de delivery; `restaurant` aloja ítems, `order` subastas, `payment` finanzas y `tracking` queda vacío. |
 | ¿Solo BD, API o todo? | **Todo: BD + API + presentación + documentación** | El molde incluye las 4 capas y la transcripción pide completar módulos. |
 | ¿`mod-auctionsim` entra en la entrega? | **Opcional, fuera de la entrega principal** | Es C++ de AzerothCore y requiere recompilar; la entrega se cubre con BD + API. |
 
@@ -58,75 +58,95 @@ proyectoX/
 │   │   ├── config.py            # variables de entorno
 │   │   └── database.py          # engine, SessionLocal, Base, get_db
 │   ├── integrations/
-│   │   └── wow/
-│   │       ├── config.py        # credenciales/URL del sync
-│   │       ├── client.py        # MySQL de AzerothCore (solo lectura)
-│   │       ├── mapping.py       # filas WoW -> dominio de subastas
-│   │       └── sync.py          # CLI de sincronización
+│   │   └── wow/                 # integración propia de proyectoX (solo lectura)
+│   │       ├── config.py
+│   │       ├── client.py
+│   │       ├── mapping.py
+│   │       └── sync.py
 │   └── modules/
-│       ├── auth/                # jugador, personaje y oro del personaje
+│       ├── auth/                # jugador, personaje y oro
+│       │   ├── application/
+│       │   │   ├── casos_uso-orquestacion.txt
+│       │   │   ├── dtos.py
+│       │   │   └── services.py
+│       │   ├── domain/
+│       │   │   ├── exceptions.py
+│       │   │   ├── models.py
+│       │   │   ├── reglas_negocio.txt
+│       │   │   └── repositories.py
+│       │   ├── infrastructure/
+│       │   │   ├── external_adapters.py
+│       │   │   ├── implementacion_tecnica.txt
+│       │   │   ├── models_db.py
+│       │   │   └── repository_impl.py
+│       │   └── presentation/
+│       │       ├── capa_exposicion.txt
+│       │       └── router.py
+│       ├── restaurant/          # item e inventario personaje-ítem
+│       │   ├── application/
+│       │   │   ├── dtos.py
+│       │   │   └── services.py
 │       │   ├── domain/
 │       │   │   ├── exceptions.py
 │       │   │   ├── models.py
 │       │   │   └── repositories.py
-│       │   ├── application/
-│       │   │   ├── datos.py
-│       │   │   └── services.py
 │       │   ├── infrastructure/
-│       │   │   ├── external_adapter.py
+│       │   │   ├── external_adapters.py
 │       │   │   ├── models_db.py
-│       │   │   └── repositories_impl.py
-│       │   └── presentation/
-│       │       ├── routers.py
-│       │       └── schemas.py
-│       ├── inventory/           # item e inventario personaje-ítem
+│       │   │   └── repository_impl.py
+│       │   ├── presentation/
+│       │   │   └── router.py
+│       │   └── __init__.py
+│       ├── order/               # subasta y puja
+│       │   ├── application/
+│       │   │   ├── dtos.py
+│       │   │   └── services.py
 │       │   ├── domain/
 │       │   │   ├── exceptions.py
 │       │   │   ├── models.py
 │       │   │   └── repositories.py
-│       │   ├── application/
-│       │   │   ├── datos.py
-│       │   │   └── services.py
 │       │   ├── infrastructure/
-│       │   │   ├── external_adapter.py
+│       │   │   ├── external_adapters.py
 │       │   │   ├── models_db.py
-│       │   │   └── repositories_impl.py
-│       │   └── presentation/
-│       │       ├── routers.py
-│       │       └── schemas.py
-│       ├── auction/             # subasta y puja
+│       │   │   └── repository_impl.py
+│       │   ├── presentation/
+│       │   │   └── router.py
+│       │   ├── __init__.py
+│       │   ├── models.py        # vacío: los modelos viven en domain/
+│       │   └── services.py      # vacío: los casos de uso viven en application/
+│       ├── payment/             # depósito, comisión, transacción y correo
+│       │   ├── application/
+│       │   │   ├── dtos.py
+│       │   │   └── services.py
 │       │   ├── domain/
 │       │   │   ├── exceptions.py
 │       │   │   ├── models.py
 │       │   │   └── repositories.py
-│       │   ├── application/
-│       │   │   ├── datos.py
-│       │   │   └── services.py
 │       │   ├── infrastructure/
-│       │   │   ├── external_adapter.py
+│       │   │   ├── external_adapters.py
 │       │   │   ├── models_db.py
-│       │   │   └── repositories_impl.py
-│       │   └── presentation/
-│       │       ├── routers.py
-│       │       └── schemas.py
-│       └── finance/             # depósito, comisión, transacción y correo
+│       │   │   └── repository_impl.py
+│       │   ├── presentation/
+│       │   │   └── router.py
+│       │   └── __init__.py
+│       └── tracking/            # sin equivalente: archivos vacíos
+│           ├── application/
+│           │   ├── dtos.py
+│           │   └── services.py
 │           ├── domain/
 │           │   ├── exceptions.py
 │           │   ├── models.py
 │           │   └── repositories.py
-│           ├── application/
-│           │   ├── datos.py
-│           │   └── services.py
 │           ├── infrastructure/
-│           │   ├── external_adapter.py
+│           │   ├── external_adapters.py
 │           │   ├── models_db.py
-│           │   └── repositories_impl.py
-│           └── presentation/
-│               ├── routers.py
-│               └── schemas.py
+│           │   └── repository_impl.py
+│           ├── presentation/
+│           │   └── router.py
+│           └── __init__.py
 ├── tests/
-│   ├── test_auction.py
 │   ├── test_modules.py
+│   ├── test_order.py
 │   ├── test_structure.py
 │   └── test_wow_sync.py
 └── wow-server/                  # stack WoW custom (sanitizado)
@@ -140,10 +160,12 @@ proyectoX/
     └── docs/
 ```
 
-Todos los módulos respetan la misma estructura de capas: `domain`,
-`application`, `infrastructure` y `presentation`. El mapeo desde los módulos
-de `delivery-monolith` (incluido `restaurant` → `inventory`) y las reglas de
-dependencia están en
+Los cinco módulos conservan los nombres y la estructura de
+`delivery-monolith`: `auth`, `restaurant`, `order`, `payment` y `tracking`.
+El contenido es el dominio de subastas de WoW: `restaurant` aloja el catálogo
+de ítems, `order` las subastas y pujas, y `payment` las finanzas. `tracking`
+queda vacío porque proyectoX no tiene reparto. El mapeo, los archivos en
+blanco y las reglas de dependencia están en
 [`docs/estructura_modulos.md`](docs/estructura_modulos.md).
 
 ---
@@ -290,9 +312,10 @@ o en VS Code con la extensión Draw.io. Tiene dos páginas:
 1. `modelo conceptual subastas`
 2. `modelo logico subastas`
 
-El modelo 2.1 se refleja en los cuatro módulos: `auth` (`jugador`,
-`personaje`), `inventory` (`item`, `inventario`), `auction` (`subasta`,
-`puja`) y `finance` (`deposito`, `comision`, `transaccion`, `correo`).
+El modelo 2.1 se refleja en los módulos con nombres de delivery: `auth`
+(`jugador`, `personaje`), `restaurant` (`item`, `inventario`), `order`
+(`subasta`, `puja`) y `payment` (`deposito`, `comision`, `transaccion`,
+`correo`). `tracking` se conserva vacío porque no hay reparto en proyectoX.
 `jugador` no guarda oro (vive en `personaje`), `personaje.nombre` es único,
 `transaccion` no repite `id_vendedor` (se deduce de `subasta`) y
 `correo.estado` usa `pendiente`, `leido`, `cobrado` o `devuelto`.
@@ -333,9 +356,9 @@ pip install -r requirements.txt
 pytest -q
 ```
 
-Las 24 pruebas cubren reglas puras del dominio (duración, pujas, compra
+Las pruebas cubren reglas puras del dominio (duración, pujas, compra
 directa, depósito, comisión, cierre y expiración), las entidades de
-`auth`/`inventory`/`finance` (`tests/test_modules.py`), el
+`auth`/`restaurant`/`payment` (`tests/test_modules.py`), el
 mapeo/sincronización de WoW (`tests/test_wow_sync.py`) y la estructura
 modular exigida (`tests/test_structure.py`), sin necesitar PostgreSQL ni
 MySQL.

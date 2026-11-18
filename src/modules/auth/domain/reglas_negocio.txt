@@ -1,0 +1,8 @@
+Reglas de negocio del módulo auth
+================================
+
+- Un jugador no almacena oro; el oro pertenece al personaje.
+- El nombre del personaje es único.
+- El nivel del personaje debe ser mayor o igual a 1.
+- El oro del personaje no puede ser negativo.
+- Un personaje no puede pujar ni comprar si no tiene oro suficiente.

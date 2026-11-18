@@ -1,0 +1,8 @@
+Implementación técnica del módulo auth
+======================================
+
+- ORM: SQLAlchemy 2 sobre PostgreSQL 15.
+- Tablas: jugador, personaje.
+- Repositorios: JugadorRepositoryImpl y PersonajeRepositoryImpl.
+- Adaptador externo: WowAuthAdapter, de solo lectura contra AzerothCore.
+- Nunca se escribe en las bases acore_* del servidor WoW.

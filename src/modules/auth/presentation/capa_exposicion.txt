@@ -1,0 +1,6 @@
+Capa de exposición del módulo auth
+=================================
+
+- GET /auth/players: lista jugadores.
+- GET /auth/characters: lista personajes.
+- GET /auth/characters/{id_personaje}: obtiene un personaje.

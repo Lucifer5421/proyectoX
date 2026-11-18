@@ -1,0 +1,13 @@
+Casos de uso del módulo auth
+============================
+
+- Listar jugadores.
+- Listar personajes.
+- Obtener un personaje por id.
+- Debitar oro de un personaje.
+- Acreditar oro a un personaje.
+
+Orquestación
+------------
+AuthService es usado por AuctionService para validar al vendedor y al comprador,
+y para mover el oro durante la publicación, la puja y la compra directa.

@@ -28,19 +28,19 @@ solo se cambia `DATABASE_URL` y se adapta el repositorio.
 
 ## 2. ¿El grupo hace solo subastas o varios módulos?
 
-**Recomendado: cuatro módulos WoW** que reflejan el modelo 2.1:
-`auth` (`jugador`, `personaje`), `inventory` (`item`, `inventario`),
-`auction` (`subasta`, `puja`) y `finance` (`deposito`, `comision`,
-`transaccion`, `correo`).
+**Recomendado: cinco módulos con la misma estructura de delivery**:
+`auth` (`jugador`, `personaje`), `restaurant` (`item`, `inventario`),
+`order` (`subasta`, `puja`), `payment` (`deposito`, `comision`,
+`transaccion`, `correo`) y `tracking` (sin equivalente en proyectoX).
 
 **Por qué:** la subasta necesita cuentas, personajes, ítems, inventario y
-registros financieros. Separarlos en módulos mantiene el monolito modular DDD,
-evita mezclar responsabilidades y deja el dominio de subastas como eje central.
-No se copian los módulos de delivery (`restaurant`, `order`, `payment`,
-`tracking`) porque pertenecen a otro dominio. El equivalente funcional de
-`restaurant` (catálogo de productos) es `inventory` en proyectoX; el detalle
-del mapeo y de las capas está en
-[`estructura_modulos.md`](estructura_modulos.md).
+registros financieros. Se conservan los nombres y la organización de
+`delivery-monolith` para que la estructura sea idéntica, pero el contenido es
+el dominio de subastas de WoW. `restaurant` contiene el catálogo de ítems,
+`order` contiene subastas y pujas, y `payment` contiene las finanzas. El módulo
+`tracking` se conserva vacío porque proyectoX no tiene reparto ni seguimiento
+en tiempo real. El detalle del mapeo, de los archivos en blanco y de las capas
+está en [`estructura_modulos.md`](estructura_modulos.md).
 
 ---
 
@@ -77,6 +77,6 @@ documenta aparte; no debe ser un requisito para aprobar el módulo de base de da
 | Pregunta | Decisión |
 |---|---|
 | Motor | PostgreSQL aparte (contenedor propio) |
-| Alcance | Cuatro módulos: auth, inventory, auction y finance |
+| Alcance | Cinco módulos con estructura de delivery: auth, restaurant, order, payment y tracking (tracking vacío) |
 | Entregable | BD + API + presentación + documentación |
 | `mod-auctionsim` | Opcional, fuera de la entrega principal |
