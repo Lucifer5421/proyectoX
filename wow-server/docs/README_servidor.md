@@ -73,6 +73,11 @@ cd ~/preyecro_docker
 | Código de registro web | — | `CAMBIAR_CODIGO_REGISTRO` |
 
 > Cambia estas claves antes de entregar el proyecto. El registro web solo crea cuentas normales (GM 0).
+>
+> El realmlist que se muestra en `/registro` y se devuelve al crear una cuenta se
+> calcula con `TAILSCALE_IP` (por defecto, la `address` de `acore_auth.realmlist`),
+> siempre con el puerto `3724` del authserver. Configura `TAILSCALE_IP` en
+> `wow-server/api/.env` para que los jugadores copien la IP correcta.
 
 ## API REST
 

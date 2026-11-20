@@ -43,6 +43,8 @@ SOAP_USER = os.getenv("SOAP_USER", "gm")
 SOAP_PASS = os.getenv("SOAP_PASS", "")
 DOCKER_SOCKET = os.getenv("DOCKER_SOCKET", "unix:///var/run/docker.sock")
 API_KEY = os.getenv("API_KEY", "cambiar-esta-clave")
+AUTH_PORT = 3724
+TAILSCALE_IP = os.getenv("TAILSCALE_IP", "").strip()
 
 REGISTRATION_ENABLED = os.getenv("REGISTRATION_ENABLED", "1") == "1"
 REGISTRATION_CODE = os.getenv("REGISTRATION_CODE", "CAMBIAR_CODIGO_REGISTRO")
@@ -72,6 +74,26 @@ def db(database: str = "acore_auth"):
         autocommit=True,
         charset="utf8mb4",
     )
+
+
+def realmlist_cliente() -> str:
+    """Devuelve la IP:puerto que el cliente WoW debe poner en realmlist.wtf.
+
+    La IP se toma de TAILSCALE_IP. Si no está configurada, se deduce de la
+    dirección pública del reino guardada en acore_auth.realmlist. El puerto
+    siempre es el del authserver (3724), no el del worldserver (8085).
+    """
+    ip = TAILSCALE_IP
+    if not ip:
+        try:
+            with db() as conn, conn.cursor() as cur:
+                cur.execute("SELECT address FROM acore_auth.realmlist WHERE id = 1")
+                fila = cur.fetchone()
+            if fila and fila.get("address"):
+                ip = fila["address"]
+        except Exception:
+            pass
+    return f"{ip or 'TU_IP_TAILSCALE'}:{AUTH_PORT}"
 
 
 def verify_key(x_api_key: Optional[str] = Header(default=None)):
@@ -234,7 +256,7 @@ code { background: #0e1529; padding: 2px 6px; border-radius: 6px; }
 <button id="btn" type="submit">Crear cuenta</button>
 </form>
 <div id="out" class="out"></div>
-<p class="small">Realmlist: <code>TU_IP_TAILSCALE:3724</code><br>Necesitas Tailscale conectado y el cliente WoW 3.3.5a.</p>
+<p class="small">Realmlist: <code>__REALMLIST__</code><br>Necesitas Tailscale conectado y el cliente WoW 3.3.5a.</p>
 </main>
 <script>
 const form = document.getElementById('form');
@@ -301,7 +323,9 @@ def root():
 def registro_form():
     if not REGISTRATION_ENABLED:
         raise HTTPException(status_code=404, detail="El registro esta desactivado")
-    return HTMLResponse(REGISTRO_HTML)
+    return HTMLResponse(
+        REGISTRO_HTML.replace("__REALMLIST__", html.escape(realmlist_cliente()))
+    )
 
 
 @app.post("/registro")
@@ -342,7 +366,7 @@ def registro(payload: RegisterIn, request: Request):
     return {
         "ok": True,
         "username": username,
-        "realmlist": "TU_IP_TAILSCALE:3724",
+        "realmlist": realmlist_cliente(),
         "mensaje": "Cuenta creada. Ya puedes entrar al juego.",
     }
 
