@@ -239,12 +239,13 @@ Detalle completo en [`docs/integracion_wow.md`](docs/integracion_wow.md).
 | Método | Ruta | Descripción |
 |---|---|---|
 | `POST` | `/auctions/` | Publicar una subasta. |
-| `GET` | `/auctions/` | Listar subastas activas. |
+| `GET` | `/auctions/` | Listar activas; admite `q`, `id_vendedor`, `id_comprador`, `id_personaje`, `usable` y `sort`. |
 | `GET` | `/auctions/{id}` | Detalle de una subasta. |
-| `POST` | `/auctions/{id}/bids` | Pujar. |
-| `GET` | `/auctions/{id}/bids` | Listar pujas de una subasta. |
+| `POST` | `/auctions/{id}/bids` | Pujar (mínimo +0.01 sobre la puja actual). |
+| `GET` | `/auctions/{id}/bids` | Listar pujas; admite `id_comprador`. |
 | `POST` | `/auctions/{id}/buy` | Compra directa. |
 | `POST` | `/auctions/{id}/close` | Cerrar/expirar una subasta vencida. |
+| `POST` | `/auctions/{id}/cancel` | Cancelar una subasta propia (cuerpo: `id_vendedor`). |
 | `GET` | `/auth/players` | Listar cuentas de jugador. |
 | `GET` | `/auth/characters` | Listar personajes y su oro. |
 | `GET` | `/auth/characters/{id}` | Detalle de un personaje. |
@@ -376,6 +377,16 @@ MySQL.
   `wow-server/scripts/setup-wow-server.sh`).
 - `wow_account_id`, `wow_guid` y `wow_entry` son columnas técnicas de la
   integración de solo lectura; no forman parte del modelo lógico 2.1.
+- **No se envían correos reales.** El módulo `mail` es el buzón interno del
+  juego: crea filas en la tabla `correo` para el personaje
+  (`id_destinatario`). No hay SMTP ni notificaciones a direcciones de email;
+  `jugador.email` es solo un identificador único de la cuenta.
+- **`.env.example`** es una plantilla de variables de Docker con valores de
+  ejemplo. Se copia a `.env` (ignorado por Git); no contiene correos ni
+  secretos. Conviene conservarlo en el repo porque documenta la configuración.
+- **`origin`** es la URL de Git (`https://github.com/Lucifer5421/proyectoX.git`),
+  usada solo por `git push` / `git pull`. No contiene correos ni tokens (la
+  autenticación está en `gh`). Es necesario para publicar, no para ejecutar la API.
 - `mod-auctionsim` es opcional y no forma parte de la entrega principal.
 - Para que las subastas entreguen ítems dentro del juego haría falta SOAP o
   `mod-auctionsim`; la entrega actual cubre BD + API + documentación + sync.

@@ -109,9 +109,10 @@ class AuctionService:
             raise SubastaCerrada("La subasta no está activa.")
 
         comprador = self.auth.obtener_personaje(data.id_comprador)
-        if data.monto <= subasta.puja_actual:
+        minimo = subasta.puja_actual + subasta.INCREMENTO_MINIMO
+        if data.monto < minimo:
             raise PujaInsuficiente(
-                f"La puja debe superar {subasta.puja_actual}."
+                f"La puja debe ser al menos {minimo}."
             )
 
         pujas_activas = self.pujas.listar_por_subasta(id_subasta)
@@ -237,9 +238,13 @@ class AuctionService:
         self.mail.crear_correo(
             Correo(
                 id_destinatario=data.id_comprador,
-                asunto=f"Compra directa: item {subasta.id_item}",
+                asunto=(
+                    f"Compra directa: item {subasta.id_item} "
+                    f"— pagado {monto}"
+                ),
                 id_item=subasta.id_item,
                 cantidad=subasta.cantidad,
+                oro=monto,
             )
         )
         return puja
@@ -305,18 +310,112 @@ class AuctionService:
         self.mail.crear_correo(
             Correo(
                 id_destinatario=ganadora.id_comprador,
-                asunto=f"Subasta ganada: item {subasta.id_item}",
+                asunto=(
+                    f"Subasta ganada: item {subasta.id_item} "
+                    f"— pagado {ganadora.monto}"
+                ),
                 id_item=subasta.id_item,
                 cantidad=subasta.cantidad,
+                oro=ganadora.monto,
             )
         )
         return ganadora
 
     # ------------------------------------------------------------------
+    # Cancelación
+    # ------------------------------------------------------------------
+    def cancelar_subasta(
+        self, id_subasta: int, id_vendedor: int
+    ) -> Subasta:
+        """Cancela una subasta propia, reembolsa y devuelve el ítem."""
+        subasta = self.subastas.obtener(id_subasta)
+        if not subasta:
+            raise SubastaNoEncontrada(
+                f"La subasta {id_subasta} no existe."
+            )
+        if subasta.id_vendedor != id_vendedor:
+            raise ValueError("Solo el vendedor puede cancelar la subasta.")
+
+        subasta.cancelar()
+        self.subastas.actualizar(subasta)
+
+        for puja in self.pujas.listar_por_subasta(id_subasta):
+            if puja.estado == EstadoPuja.ACTIVA:
+                self.auth.acreditar_oro(puja.id_comprador, puja.monto)
+                self.pujas.actualizar_estado(
+                    puja.id_puja, EstadoPuja.SUPERADA.value
+                )
+
+        self.inventory.agregar_item(
+            id_vendedor, subasta.id_item, subasta.cantidad
+        )
+        return subasta
+
+    # ------------------------------------------------------------------
     # Consultas
     # ------------------------------------------------------------------
-    def listar_subastas(self) -> List[Subasta]:
-        return self.subastas.listar_activas()
+    def listar_subastas(
+        self,
+        q: Optional[str] = None,
+        id_vendedor: Optional[int] = None,
+        id_comprador: Optional[int] = None,
+        id_personaje: Optional[int] = None,
+        usable: bool = False,
+        sort: Optional[str] = None,
+    ) -> List[Subasta]:
+        """Lista activas con búsqueda, filtros y orden de la guía de WoW."""
+        subastas = self.subastas.listar_activas()
+        items = {
+            item.id_item: item
+            for item in self.inventory.listar_items()
+        }
+
+        if q:
+            texto = q.casefold()
+            subastas = [
+                s
+                for s in subastas
+                if texto in items[s.id_item].nombre.casefold()
+            ]
+
+        if id_vendedor is not None:
+            subastas = [
+                s for s in subastas if s.id_vendedor == id_vendedor
+            ]
+
+        if id_comprador is not None:
+            subastas = [
+                s
+                for s in subastas
+                if any(p.id_comprador == id_comprador for p in s.pujas)
+            ]
+
+        if usable:
+            if id_personaje is None:
+                raise ValueError(
+                    "id_personaje es obligatorio para filtrar por utilizables."
+                )
+            nivel = self.auth.obtener_personaje(id_personaje).nivel
+            subastas = [
+                s
+                for s in subastas
+                if items[s.id_item].nivel_requerido <= nivel
+            ]
+
+        claves = {
+            "precio_asc": lambda s: s.puja_actual,
+            "precio_desc": lambda s: -s.puja_actual,
+            "rareza": lambda s: items[s.id_item].rareza,
+            "nivel": lambda s: items[s.id_item].nivel_requerido,
+            "tiempo": lambda s: s.fecha_fin,
+            "vendedor": lambda s: s.id_vendedor,
+        }
+        if sort:
+            if sort not in claves:
+                raise ValueError(f"Orden desconocido: {sort}")
+            subastas = sorted(subastas, key=claves[sort])
+
+        return subastas
 
     def obtener_subasta(self, id_subasta: int) -> Subasta:
         subasta = self.subastas.obtener(id_subasta)
@@ -326,8 +425,17 @@ class AuctionService:
             )
         return subasta
 
-    def listar_pujas(self, id_subasta: int) -> List[Puja]:
-        return self.pujas.listar_por_subasta(id_subasta)
+    def listar_pujas(
+        self, id_subasta: int, id_comprador: Optional[int] = None
+    ) -> List[Puja]:
+        pujas = self.pujas.listar_por_subasta(id_subasta)
+        if id_comprador is not None:
+            pujas = [
+                p
+                for p in pujas
+                if p.id_comprador == id_comprador
+            ]
+        return pujas
 
     # ------------------------------------------------------------------
     # Interno

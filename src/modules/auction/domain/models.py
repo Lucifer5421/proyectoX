@@ -46,7 +46,7 @@ class Subasta:
       - Duración permitida: 2, 8 o 24 horas.
       - Depósito del 5% del precio de salida al publicar.
       - Comisión del 5% sobre el monto final de la venta.
-      - Una puja debe superar la puja actual.
+      - Una puja debe superar la actual en al menos 0.01 (1 cobre).
       - La compra directa cierra la subasta inmediatamente.
       - Al cerrar, gana la puja más alta.
     """
@@ -65,6 +65,8 @@ class Subasta:
 
     DEPOSITO_PORCENTAJE = Decimal("0.05")
     COMISION_PORCENTAJE = Decimal("0.05")
+    # Guía de WoW Classic: cada puja sube al menos 1 cobre.
+    INCREMENTO_MINIMO = Decimal("0.01")
 
     def __post_init__(self):
         if self.duracion_horas not in (2, 8, 24):
@@ -110,6 +112,24 @@ class Subasta:
             Decimal("0.01")
         )
 
+    @property
+    def ganador_actual(self) -> Optional[int]:
+        """Personaje que sostiene la puja activa más alta, si la hay."""
+        activas = [
+            p for p in self.pujas if p.estado == EstadoPuja.ACTIVA
+        ]
+        if not activas:
+            return None
+        return max(activas, key=lambda p: p.monto).id_comprador
+
+    @property
+    def tiempo_restante(self) -> Optional[int]:
+        """Segundos que faltan para el cierre (0 si ya terminó)."""
+        if self.fecha_fin is None:
+            return None
+        restante = self.fecha_fin - _utcnow()
+        return max(0, int(restante.total_seconds()))
+
     def pujar(self, monto: Decimal, comprador: int) -> Puja:
         if self.estado != EstadoSubasta.ACTIVA:
             raise ValueError("La subasta no está activa.")
@@ -117,8 +137,10 @@ class Subasta:
             raise ValueError(
                 "El vendedor no puede pujar en su propia subasta."
             )
-        if monto <= self.puja_actual:
-            raise ValueError("La puja debe superar la puja actual.")
+        if monto < self.puja_actual + self.INCREMENTO_MINIMO:
+            raise ValueError(
+                "La puja debe superar la puja actual en al menos 0.01."
+            )
         for p in self.pujas:
             if p.estado == EstadoPuja.ACTIVA:
                 p.estado = EstadoPuja.SUPERADA
@@ -167,3 +189,9 @@ class Subasta:
     def expirar(self) -> None:
         if self.estado == EstadoSubasta.ACTIVA:
             self.estado = EstadoSubasta.EXPIRADA
+
+    def cancelar(self) -> None:
+        """Cancela una subasta activa; el servicio devuelve el ítem."""
+        if self.estado != EstadoSubasta.ACTIVA:
+            raise ValueError("La subasta no está activa.")
+        self.estado = EstadoSubasta.CANCELADA

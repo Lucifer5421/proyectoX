@@ -130,3 +130,42 @@ def test_cerrar_con_pujas_gana_la_mas_alta():
     assert ganadora.id_comprador == 3
     assert subasta.estado == EstadoSubasta.VENDIDA
     assert subasta.puja_actual == Decimal("120")
+
+
+def test_incremento_minimo_de_un_cobre():
+    subasta = Subasta(
+        id_vendedor=1, id_item=1, precio_salida=Decimal("100")
+    )
+    with pytest.raises(ValueError):
+        subasta.pujar(Decimal("100.00"), comprador=2)
+
+    puja = subasta.pujar(Decimal("100.01"), comprador=2)
+    assert puja.monto == Decimal("100.01")
+
+
+def test_ganador_actual_y_tiempo_restante():
+    subasta = Subasta(
+        id_vendedor=1,
+        id_item=1,
+        precio_salida=Decimal("100"),
+        duracion_horas=2,
+    )
+    assert subasta.ganador_actual is None
+    assert 0 < subasta.tiempo_restante <= 7200
+
+    subasta.pujar(Decimal("110"), comprador=2)
+    assert subasta.ganador_actual == 2
+
+    subasta.fecha_fin = _utcnow() - timedelta(minutes=1)
+    assert subasta.tiempo_restante == 0
+
+
+def test_cancelar_subasta():
+    subasta = Subasta(
+        id_vendedor=1, id_item=1, precio_salida=Decimal("100")
+    )
+    subasta.cancelar()
+
+    assert subasta.estado == EstadoSubasta.CANCELADA
+    with pytest.raises(ValueError):
+        subasta.cancelar()

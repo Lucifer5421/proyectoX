@@ -28,6 +28,10 @@ class CompraDirectaIn(BaseModel):
     id_comprador: int
 
 
+class CancelarIn(BaseModel):
+    id_vendedor: int
+
+
 # ---------------------------------------------------------------------------
 # Salida
 # ---------------------------------------------------------------------------
@@ -45,6 +49,8 @@ class SubastaOut(BaseModel):
     fecha_inicio: datetime
     fecha_fin: Optional[datetime]
     puja_actual: Decimal
+    id_ganador_actual: Optional[int] = None
+    tiempo_restante: Optional[int] = None
 
 
 class PujaOut(BaseModel):
