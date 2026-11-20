@@ -136,17 +136,43 @@ proyectoX/
 │   ├── integrations/wow/        # sincronización de solo lectura
 │   └── modules/
 │       ├── auth/                # jugador, personaje
+│       │   ├── application/     # servicios y DTOs (+ casos_uso-orquestacion.txt)
+│       │   ├── domain/          # entidades y reglas (+ reglas_negocio.txt)
+│       │   ├── infrastructure/  # ORM, repositorios (+ implementacion_tecnica.txt)
+│       │   └── presentation/    # router (+ capa_exposicion.txt)
 │       ├── inventory/           # item, inventario
+│       │   ├── application/
+│       │   ├── domain/
+│       │   ├── infrastructure/
+│       │   └── presentation/
 │       ├── auction/             # subasta, puja
+│       │   ├── application/
+│       │   ├── domain/
+│       │   ├── infrastructure/
+│       │   └── presentation/
 │       ├── finance/             # depósito, comisión, transacción
+│       │   ├── application/
+│       │   ├── domain/
+│       │   └── infrastructure/  # sin presentation: módulo interno
 │       └── mail/                # correo
-├── tests/
+│           ├── application/
+│           ├── domain/
+│           ├── infrastructure/
+│           └── presentation/
+├── tests/                       # 40 pruebas en 4 archivos + __init__.py
 │   ├── test_auction.py
 │   ├── test_modules.py
 │   ├── test_structure.py
 │   └── test_wow_sync.py
 └── wow-server/                  # stack WoW de prueba, sin credenciales
 ```
+
+Cada archivo lleva una cabecera `MÓDULO / CAPA / ARCHIVO / QUÉ HACE / DETALLE`,
+explicada en la sección 3; el inventario completo está en
+[`docs/estructura_modulos.md`](docs/estructura_modulos.md). `finance` no tiene
+`presentation/` porque no expone endpoints. `auth` conserva cuatro documentos
+`.txt` de apoyo: casos de uso, reglas de negocio, implementación técnica y
+exposición de la capa de presentación.
 
 ---
 
