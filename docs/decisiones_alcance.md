@@ -1,8 +1,8 @@
 # Decisiones de alcance del proyecto
 
-Este documento responde las 4 preguntas de alcance usando como base los materiales
-del curso (`delivery-monolith`, transcripción, PDF de actores y documento de WoW Classic).
-`delivery-monolith` se usa **solo como guía estructural**; no se modifica.
+Este documento responde las 4 preguntas de alcance usando como base el modelo
+lógico 2.1, la transcripción de la clase, el PDF de actores y el documento de
+WoW Classic. La arquitectura descrita aquí es propia de ProyectoX.
 
 ---
 
@@ -12,17 +12,17 @@ del curso (`delivery-monolith`, transcripción, PDF de actores y documento de Wo
 
 | Criterio | PostgreSQL aparte | MySQL integrado |
 |---|---|---|
-| Coincide con el molde | Sí (el molde usa PostgreSQL) | No |
+| Coherencia con la arquitectura DDD | Alta (PostgreSQL y SQLAlchemy son el stack definido) | Baja |
 | Riesgo para el servidor WoW | Ninguno | Alto (se toca la BD del juego) |
 | Facilidad de demostración | Alta (contenedor aislado) | Media (depende del mundo) |
 | SQLAlchemy / DDD | Directo | Requiere adaptar el driver |
 | Datos reales del juego | No | Sí |
 
 **Por qué:** la entrega de la clase de base de datos evalúa modelo ER, SQL, DDD y API.
-El molde `delivery-monolith` ya trae PostgreSQL, `psycopg2` y SQLAlchemy; seguirlo
-reduce el riesgo y permite demostrar el módulo sin tocar el MySQL de AzerothCore.
-El MySQL del servidor se queda para el juego. Si más adelante se pide integración real,
-solo se cambia `DATABASE_URL` y se adapta el repositorio.
+El stack elegido (PostgreSQL, `psycopg2` y SQLAlchemy) reduce el riesgo y permite
+demostrar el módulo sin tocar el MySQL de AzerothCore. El MySQL del servidor se
+queda para el juego. Si más adelante se pide integración real, solo se cambia
+`DATABASE_URL` y se adapta el repositorio.
 
 ---
 
@@ -35,7 +35,7 @@ solo se cambia `DATABASE_URL` y se adapta el repositorio.
 
 **Por qué:** la subasta necesita cuentas, personajes, ítems, inventario,
 registros financieros y entrega por correo. Los nombres salen del modelo
-lógico 2.1 y no de `delivery-monolith`. `inventory` contiene el catálogo de
+lógico 2.1 y de las responsabilidades del dominio. `inventory` contiene el catálogo de
 ítems, `auction` las subastas y pujas, `finance` los movimientos económicos y
 `mail` la entrega al ganador o la devolución al vendedor. No hay módulos
 vacíos. El detalle del mapeo y de las capas está en
@@ -54,9 +54,10 @@ vacíos. El detalle del mapeo y de las capas está en
   cierre, cuentas/personajes, inventario y correo.
 - **Documentación:** reglas de negocio, decisiones y diagramas.
 
-**Por qué:** el molde tiene las 4 capas y la transcripción pide organizar el código y
-completar módulos. Entregar solo la BD dejaría fuera la parte de DDD y la API, que es
-justamente lo que diferencia este trabajo de un simple script SQL.
+**Por qué:** la arquitectura DDD define las 4 capas y la transcripción pide
+organizar el código y completar módulos. Entregar solo la BD dejaría fuera la
+parte de DDD y la API, que es justamente lo que diferencia este trabajo de un
+simple script SQL.
 
 ---
 
@@ -66,7 +67,7 @@ justamente lo que diferencia este trabajo de un simple script SQL.
 
 **Por qué:** `mod-auctionsim` es un módulo C++ de AzerothCore que requiere recompilar
 el `worldserver`. El PDF de la tarea pide identificar actores, entidades y modelos; el
-molde es Python/FastAPI/PostgreSQL. La entrega académica se cubre con la BD + API.
+stack de ProyectoX es Python/FastAPI/PostgreSQL. La entrega académica se cubre con la BD + API.
 Si el profesor pide la funcionalidad dentro del juego, se instala como extra y se
 documenta aparte; no debe ser un requisito para aprobar el módulo de base de datos.
 

@@ -1,12 +1,11 @@
 # Estructura modular de proyectoX
 
 Este documento fija la estructura de `proyectoX` a partir del **modelo lógico
-2.1** (`docs/modelo_subastas_2.1.drawio`) y de la organización por capas de
-`delivery-monolith`.
+2.1** (`docs/modelo_subastas_2.1.drawio`) y de una arquitectura monolítica
+modular con capas DDD.
 
-`delivery-monolith` se usa **solo como referencia de arquitectura**: no se
-modifica y ya no se copian sus nombres de módulos. Los módulos de proyectoX
-son los del dominio de subastas de World of Warcraft.
+Los módulos de ProyectoX responden al dominio de subastas de
+*World of Warcraft*: `auth`, `inventory`, `auction`, `finance` y `mail`.
 
 ## Cómo leer cada archivo (cabeceras)
 
@@ -156,8 +155,8 @@ La integración con AzerothCore es de **solo lectura**:
   adaptadores quedan como puntos de extensión.
 
 El cliente MySQL y el plan de sincronización viven en
-`src/integrations/wow/`. Esa carpeta es propia de proyectoX y no existe en
-`delivery-monolith`.
+`src/integrations/wow/`. Esa carpeta es propia de ProyectoX y centraliza toda
+la comunicación con AzerothCore.
 
 ## 6. `init.sql` y `main.py`
 
