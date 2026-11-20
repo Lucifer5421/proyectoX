@@ -1,9 +1,11 @@
 # ============================================================================
 # MÓDULO: inventory  |  CAPA: infrastructure  |  ARCHIVO: models_db.py
-# QUÉ HACE: Modelos ORM del módulo inventory (catálogo e inventario): item e inventario.
+# QUÉ HACE: Modelos ORM de SQLAlchemy: mapean las tablas del modelo 2.1
+#           a clases Python. Las tablas las crea init.sql; aquí solo se representan.
 # DETALLE: clases: ItemModel, InventarioModel
 # ============================================================================
-"""Modelos ORM del módulo inventory (catálogo e inventario): item e inventario."""
+"""Modelos ORM de SQLAlchemy: mapean las tablas del modelo 2.1 a clases Python.
+Las tablas las crea init.sql; aquí solo se representan."""
 
 from sqlalchemy import (
     CheckConstraint,

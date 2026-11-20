@@ -1,9 +1,12 @@
 # ============================================================================
 # MÓDULO: inventory  |  CAPA: infrastructure  |  ARCHIVO: repository_impl.py
-# QUÉ HACE: Implementaciones SQLAlchemy de los repositorios de inventory (catálogo e inventario).
+# QUÉ HACE: Repositorios con SQLAlchemy ORM: convierten las entidades ORM
+#           (models_db.py) en entidades de dominio y consultan PostgreSQL.
+#           No contienen SQL crudo; eso está en init.sql.
 # DETALLE: clases: ItemRepositoryImpl, InventarioRepositoryImpl
 # ============================================================================
-"""Implementaciones SQLAlchemy de los repositorios de inventory (catálogo e inventario)."""
+"""Repositorios con SQLAlchemy ORM: convierten las entidades ORM (models_db.py)
+en entidades de dominio y consultan PostgreSQL. No contienen SQL crudo."""
 
 from decimal import Decimal
 from typing import List, Optional

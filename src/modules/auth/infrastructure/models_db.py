@@ -1,9 +1,11 @@
 # ============================================================================
 # MÓDULO: auth  |  CAPA: infrastructure  |  ARCHIVO: models_db.py
-# QUÉ HACE: Modelos ORM del módulo auth: jugador y personaje.
+# QUÉ HACE: Modelos ORM de SQLAlchemy: mapean las tablas del modelo 2.1
+#           a clases Python. Las tablas las crea init.sql; aquí solo se representan.
 # DETALLE: clases: JugadorModel, PersonajeModel
 # ============================================================================
-"""Modelos ORM del módulo auth: jugador y personaje."""
+"""Modelos ORM de SQLAlchemy: mapean las tablas del modelo 2.1 a clases Python.
+Las tablas las crea init.sql; aquí solo se representan."""
 
 from sqlalchemy import (
     TIMESTAMP,

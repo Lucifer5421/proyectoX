@@ -1,9 +1,11 @@
 # ============================================================================
 # MÓDULO: auction  |  CAPA: infrastructure  |  ARCHIVO: models_db.py
-# QUÉ HACE: Modelos ORM del módulo auction (subastas): subasta y puja.
+# QUÉ HACE: Modelos ORM de SQLAlchemy: mapean las tablas del modelo 2.1
+#           a clases Python. Las tablas las crea init.sql; aquí solo se representan.
 # DETALLE: clases: SubastaModel, PujaModel
 # ============================================================================
-"""Modelos ORM del módulo auction (subastas): subasta y puja."""
+"""Modelos ORM de SQLAlchemy: mapean las tablas del modelo 2.1 a clases Python.
+Las tablas las crea init.sql; aquí solo se representan."""
 
 from sqlalchemy import (
     TIMESTAMP,

@@ -138,7 +138,10 @@ auth/
   validaciones (`ValueError`) y contratos de repositorio.
 - `application` orquesta el dominio y los repositorios; no conoce FastAPI.
 - `infrastructure` implementa los repositorios, contiene las entidades ORM y
-  los adaptadores externos.
+  los adaptadores externos. Sí se usa **SQLAlchemy**: `models_db.py` mapea las
+  tablas y `repository_impl.py` las consulta con la sesión. El SQL crudo para
+  crear las tablas está en `init.sql`; el dominio y `application` no usan
+  SQLAlchemy directamente.
 - `presentation` depende de `application` y expone la API REST.
 - La comunicación entre módulos se hace por servicios de aplicación:
   `AuthService`, `InventoryService`, `FinanceService` y `MailService`.

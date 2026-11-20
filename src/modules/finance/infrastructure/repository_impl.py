@@ -1,9 +1,12 @@
 # ============================================================================
 # MÓDULO: finance  |  CAPA: infrastructure  |  ARCHIVO: repository_impl.py
-# QUÉ HACE: Implementaciones SQLAlchemy de los repositorios de finance.
+# QUÉ HACE: Repositorios con SQLAlchemy ORM: convierten las entidades ORM
+#           (models_db.py) en entidades de dominio y consultan PostgreSQL.
+#           No contienen SQL crudo; eso está en init.sql.
 # DETALLE: clases: DepositoRepositoryImpl, ComisionRepositoryImpl, TransaccionRepositoryImpl
 # ============================================================================
-"""Implementaciones SQLAlchemy de los repositorios de finance."""
+"""Repositorios con SQLAlchemy ORM: convierten las entidades ORM (models_db.py)
+en entidades de dominio y consultan PostgreSQL. No contienen SQL crudo."""
 
 from decimal import Decimal
 

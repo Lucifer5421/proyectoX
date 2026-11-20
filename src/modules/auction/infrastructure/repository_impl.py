@@ -1,9 +1,12 @@
 # ============================================================================
 # MÓDULO: auction  |  CAPA: infrastructure  |  ARCHIVO: repository_impl.py
-# QUÉ HACE: Implementaciones SQLAlchemy de los repositorios de auction (subastas).
+# QUÉ HACE: Repositorios con SQLAlchemy ORM: convierten las entidades ORM
+#           (models_db.py) en entidades de dominio y consultan PostgreSQL.
+#           No contienen SQL crudo; eso está en init.sql.
 # DETALLE: clases: SubastaRepositoryImpl, PujaRepositoryImpl
 # ============================================================================
-"""Implementaciones SQLAlchemy de los repositorios de auction (subastas)."""
+"""Repositorios con SQLAlchemy ORM: convierten las entidades ORM (models_db.py)
+en entidades de dominio y consultan PostgreSQL. No contienen SQL crudo."""
 
 from typing import List, Optional
 

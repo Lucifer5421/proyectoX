@@ -1,9 +1,11 @@
 # ============================================================================
 # MÓDULO: finance  |  CAPA: infrastructure  |  ARCHIVO: models_db.py
-# QUÉ HACE: Modelos ORM del módulo finance: depósito, comisión y transacción.
+# QUÉ HACE: Modelos ORM de SQLAlchemy: mapean las tablas del modelo 2.1
+#           a clases Python. Las tablas las crea init.sql; aquí solo se representan.
 # DETALLE: clases: DepositoModel, ComisionModel, TransaccionModel
 # ============================================================================
-"""Modelos ORM del módulo finance: depósito, comisión y transacción.
+"""Modelos ORM de SQLAlchemy: mapean las tablas del modelo 2.1 a clases Python.
+Las tablas las crea init.sql; aquí solo se representan.
 
 Solo entidades SQLAlchemy. Las reglas de negocio viven en
 `src/modules/finance/domain/models.py`.

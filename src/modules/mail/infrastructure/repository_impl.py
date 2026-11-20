@@ -1,9 +1,12 @@
 # ============================================================================
 # MÓDULO: mail  |  CAPA: infrastructure  |  ARCHIVO: repository_impl.py
-# QUÉ HACE: Implementaciones SQLAlchemy de los repositorios de mail.
+# QUÉ HACE: Repositorios con SQLAlchemy ORM: convierten las entidades ORM
+#           (models_db.py) en entidades de dominio y consultan PostgreSQL.
+#           No contienen SQL crudo; eso está en init.sql.
 # DETALLE: clases: CorreoRepositoryImpl
 # ============================================================================
-"""Implementaciones SQLAlchemy de los repositorios de mail."""
+"""Repositorios con SQLAlchemy ORM: convierten las entidades ORM (models_db.py)
+en entidades de dominio y consultan PostgreSQL. No contienen SQL crudo."""
 
 from decimal import Decimal
 from typing import List
