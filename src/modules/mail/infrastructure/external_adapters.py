@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: mail  |  CAPA: infrastructure  |  ARCHIVO: external_adapters.py
+# QUÉ HACE: Adaptador externo del módulo mail.
+# DETALLE: clases: WowMailAdapter
+# ============================================================================
 """Adaptador externo del módulo mail.
 
 El correo de proyectoX vive en PostgreSQL. La entrega real dentro del

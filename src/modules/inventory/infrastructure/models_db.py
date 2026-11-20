@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: inventory  |  CAPA: infrastructure  |  ARCHIVO: models_db.py
+# QUÉ HACE: Modelos ORM del módulo inventory (catálogo e inventario): item e inventario.
+# DETALLE: clases: ItemModel, InventarioModel
+# ============================================================================
 """Modelos ORM del módulo inventory (catálogo e inventario): item e inventario."""
 
 from sqlalchemy import (

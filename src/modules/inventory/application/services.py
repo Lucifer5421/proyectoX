@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: inventory  |  CAPA: application  |  ARCHIVO: services.py
+# QUÉ HACE: Casos de uso del módulo inventory (catálogo e inventario).
+# DETALLE: clases: InventoryService
+# ============================================================================
 """Casos de uso del módulo inventory (catálogo e inventario).
 
 Gestiona el catálogo de ítems y la relación N:M personaje-ítem.

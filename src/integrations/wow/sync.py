@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: integraciones/wow  |  CAPA: integración  |  ARCHIVO: sync.py
+# QUÉ HACE: Sincroniza datos reales de AzerothCore hacia el PostgreSQL de subastas.
+# DETALLE: funciones: build_plan, apply_plan, print_plan, main
+# ============================================================================
 """Sincroniza datos reales de AzerothCore hacia el PostgreSQL de subastas.
 
 Lee de MySQL (`acore_auth`, `acore_characters`, `acore_world`) y escribe
@@ -24,15 +29,16 @@ from src.integrations.wow.mapping import (
     item_desde_fila,
     personaje_desde_fila,
 )
-from src.modules.auth.infrastructure.external_adapters import WowAuthAdapter
-from src.modules.auth.infrastructure.models_db import (
+# El sync solo escribe en auth e inventory: nunca en auction/finance/mail.
+from src.modules.auth.infrastructure.external_adapters import WowAuthAdapter  # módulo auth
+from src.modules.auth.infrastructure.models_db import (  # módulo auth
     JugadorModel,
     PersonajeModel,
 )
-from src.modules.inventory.infrastructure.external_adapters import (
+from src.modules.inventory.infrastructure.external_adapters import (  # módulo inventory
     WowInventoryAdapter,
 )
-from src.modules.inventory.infrastructure.models_db import (
+from src.modules.inventory.infrastructure.models_db import (  # módulo inventory
     InventarioModel,
     ItemModel,
 )

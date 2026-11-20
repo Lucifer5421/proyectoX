@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: integraciones/wow  |  CAPA: integración  |  ARCHIVO: mapping.py
+# QUÉ HACE: Mapeos puros entre AzerothCore y el modelo de subastas.
+# DETALLE: funciones: clase_nombre, rareza_nombre, cobre_a_oro, personaje_desde_fila, item_desde_fila, inventario_desd...
+# ============================================================================
 """Mapeos puros entre AzerothCore y el modelo de subastas.
 
 No tocan base de datos: reciben filas (dicts) y devuelven dicts listos para

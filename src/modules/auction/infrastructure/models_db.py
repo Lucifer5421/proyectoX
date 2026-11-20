@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auction  |  CAPA: infrastructure  |  ARCHIVO: models_db.py
+# QUÉ HACE: Modelos ORM del módulo auction (subastas): subasta y puja.
+# DETALLE: clases: SubastaModel, PujaModel
+# ============================================================================
 """Modelos ORM del módulo auction (subastas): subasta y puja."""
 
 from sqlalchemy import (

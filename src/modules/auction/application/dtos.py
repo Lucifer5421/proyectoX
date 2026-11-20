@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auction  |  CAPA: application  |  ARCHIVO: dtos.py
+# QUÉ HACE: Contratos de datos (DTO) de entrada y salida del módulo auction (subastas).
+# DETALLE: clases: PublicarSubastaIn, PujaIn, CompraDirectaIn, CancelarIn, SubastaOut, PujaOut
+# ============================================================================
 """Contratos de datos (DTO) de entrada y salida del módulo auction (subastas)."""
 
 from datetime import datetime

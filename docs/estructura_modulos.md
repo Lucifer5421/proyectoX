@@ -8,6 +8,32 @@ Este documento fija la estructura de `proyectoX` a partir del **modelo lógico
 modifica y ya no se copian sus nombres de módulos. Los módulos de proyectoX
 son los del dominio de subastas de World of Warcraft.
 
+## Cómo leer cada archivo (cabeceras)
+
+Todo archivo Python de `src/` empieza con una cabecera de cinco líneas:
+
+```python
+# ============================================================================
+# MÓDULO: auction  |  CAPA: domain  |  ARCHIVO: models.py
+# QUÉ HACE: Entidades y reglas de negocio puras del módulo de subastas.
+# DETALLE: clases: EstadoSubasta, EstadoPuja, Puja, Subasta
+# ============================================================================
+```
+
+- **MÓDULO**: `auth`, `inventory`, `auction`, `finance` o `mail`. Aparte están
+  `core` (configuración y base de datos compartidas), `integraciones/wow`
+  (sincronización de solo lectura) y `aplicación` (`src/main.py`).
+- **CAPA**: `domain` (reglas sin frameworks), `application` (casos de uso),
+  `infrastructure` (SQLAlchemy, repositorios y adaptadores), `presentation`
+  (endpoints REST), más `base`, `integración` y `composición` para los casos
+  anteriores.
+- **QUÉ HACE**: la función del archivo en una frase.
+- **DETALLE**: entidades, clases, funciones o endpoints concretos que contiene.
+
+Los archivos SQL usan el mismo esquema en comentarios `-- MÓDULO ...` y
+`-- QUÉ HACE: ...`. En `init.sql` y `sql/01_schema.sql` cada tabla documenta
+además su PK, FK, cardinalidad y restricciones.
+
 ## 1. Módulos
 
 ```text

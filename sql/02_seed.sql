@@ -1,8 +1,14 @@
 -- ============================================================
 -- ProyectoX — Subastas WoW
 -- 02_seed.sql: datos iniciales de demostración
+-- QUÉ HACE: inserta datos de ejemplo; nunca se ejecuta desde init.sql.
+-- MÓDULOS: auth, inventory, auction y finance (mail no tiene seed).
 -- ============================================================
 
+-- ------------------------------------------------------------
+-- MÓDULO auth · JUGADOR y PERSONAJE
+-- QUÉ HACE: crea las cuentas y los personajes con su oro inicial.
+-- ------------------------------------------------------------
 INSERT INTO jugador (nombre, email) VALUES
     ('Luis',    'luis@example.com'),
     ('Aracely', 'aracely@example.com')
@@ -20,6 +26,11 @@ FROM jugador j
 WHERE j.email = 'aracely@example.com'
   AND NOT EXISTS (SELECT 1 FROM personaje p WHERE p.nombre = 'Aracely');
 
+-- ------------------------------------------------------------
+-- MÓDULO inventory · ITEM e INVENTARIO
+-- QUÉ HACE: crea el catálogo y las existencias iniciales de cada personaje.
+-- precio_base es el "precio del vendedor" que muestra la guía de WoW.
+-- ------------------------------------------------------------
 INSERT INTO item (nombre, rareza, nivel_requerido, precio_base)
 SELECT 'Espada de fuego', 'epica', 60, 500.00
 WHERE NOT EXISTS (SELECT 1 FROM item WHERE nombre = 'Espada de fuego');
@@ -63,8 +74,11 @@ WHERE p.nombre = 'Luis'
       WHERE inv.id_personaje = p.id_personaje AND inv.id_item = i.id_item
   );
 
--- Subasta de ejemplo: Luis vende la Espada de fuego.
--- La CTE solo descuenta el ítem si la subasta se insertó de verdad.
+-- ------------------------------------------------------------
+-- MÓDULO auction · SUBASTA
+-- QUÉ HACE: publica la subasta de ejemplo y descuenta el ítem del
+-- inventario del vendedor. La CTE solo descuenta si se insertó de verdad.
+-- ------------------------------------------------------------
 WITH nueva AS (
     INSERT INTO subasta (
         id_vendedor, id_item, cantidad, precio_salida,
@@ -90,8 +104,11 @@ WHERE inv.id_personaje = n.id_vendedor
   AND inv.id_item = n.id_item
   AND inv.cantidad > 0;
 
--- Depósito de la subasta de ejemplo (5% de 100 = 5).
--- La CTE solo descuenta el oro si el depósito se insertó de verdad.
+-- ------------------------------------------------------------
+-- MÓDULO finance · DEPOSITO
+-- QUÉ HACE: registra el depósito del 5 % (5 de 100) y descuenta el oro
+-- del vendedor. La CTE solo descuenta si se insertó de verdad.
+-- ------------------------------------------------------------
 WITH dep AS (
     INSERT INTO deposito (id_subasta, monto, pagado)
     SELECT s.id_subasta, 5.00, true

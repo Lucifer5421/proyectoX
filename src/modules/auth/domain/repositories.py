@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auth  |  CAPA: domain  |  ARCHIVO: repositories.py
+# QUÉ HACE: Contratos de repositorio del módulo auth.
+# DETALLE: clases: JugadorRepository, PersonajeRepository
+# ============================================================================
 """Contratos de repositorio del módulo auth."""
 
 from abc import ABC, abstractmethod

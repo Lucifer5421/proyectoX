@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auth  |  CAPA: infrastructure  |  ARCHIVO: models_db.py
+# QUÉ HACE: Modelos ORM del módulo auth: jugador y personaje.
+# DETALLE: clases: JugadorModel, PersonajeModel
+# ============================================================================
 """Modelos ORM del módulo auth: jugador y personaje."""
 
 from sqlalchemy import (

@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: mail  |  CAPA: infrastructure  |  ARCHIVO: models_db.py
+# QUÉ HACE: Modelos ORM del módulo mail: correo.
+# DETALLE: clases: CorreoModel
+# ============================================================================
 """Modelos ORM del módulo mail: correo.
 
 Solo entidades SQLAlchemy. Las reglas de negocio viven en

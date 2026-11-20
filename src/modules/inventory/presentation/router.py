@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: inventory  |  CAPA: presentation  |  ARCHIVO: router.py
+# QUÉ HACE: Capa de presentación del módulo inventory (catálogo e inventario).
+# DETALLE: endpoints: GET /items, GET /characters/{id_personaje}
+# ============================================================================
 """Capa de presentación del módulo inventory (catálogo e inventario)."""
 
 from typing import List

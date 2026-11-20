@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: finance  |  CAPA: infrastructure  |  ARCHIVO: models_db.py
+# QUÉ HACE: Modelos ORM del módulo finance: depósito, comisión y transacción.
+# DETALLE: clases: DepositoModel, ComisionModel, TransaccionModel
+# ============================================================================
 """Modelos ORM del módulo finance: depósito, comisión y transacción.
 
 Solo entidades SQLAlchemy. Las reglas de negocio viven en

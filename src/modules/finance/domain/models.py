@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: finance  |  CAPA: domain  |  ARCHIVO: models.py
+# QUÉ HACE: Entidades del módulo finance: depósito, comisión y transacción.
+# DETALLE: clases: TipoTransaccion, Deposito, Comision, Transaccion
+# ============================================================================
 """Entidades del módulo finance: depósito, comisión y transacción.
 
 Solo Python: no conoce SQLAlchemy, FastAPI ni PostgreSQL.

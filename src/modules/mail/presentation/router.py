@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: mail  |  CAPA: presentation  |  ARCHIVO: router.py
+# QUÉ HACE: Capa de presentación (API REST) del módulo mail.
+# DETALLE: endpoints: GET /{id_personaje}
+# ============================================================================
 """Capa de presentación (API REST) del módulo mail."""
 
 from typing import List

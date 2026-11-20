@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: integraciones/wow  |  CAPA: integración  |  ARCHIVO: config.py
+# QUÉ HACE: Configuración de la integración con AzerothCore.
+# DETALLE: funciones: load_settings, database_url_for_sync
+# ============================================================================
 """Configuración de la integración con AzerothCore.
 
 Las credenciales se leen de variables de entorno. Nunca se escriben en el

@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: finance  |  CAPA: infrastructure  |  ARCHIVO: repository_impl.py
+# QUÉ HACE: Implementaciones SQLAlchemy de los repositorios de finance.
+# DETALLE: clases: DepositoRepositoryImpl, ComisionRepositoryImpl, TransaccionRepositoryImpl
+# ============================================================================
 """Implementaciones SQLAlchemy de los repositorios de finance."""
 
 from decimal import Decimal

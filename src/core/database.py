@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: core  |  CAPA: base  |  ARCHIVO: database.py
+# QUÉ HACE: Crea el engine, la sesión y la base declarativa de SQLAlchemy.
+# DETALLE: funciones: get_db
+# ============================================================================
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 

@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auth  |  CAPA: application  |  ARCHIVO: dtos.py
+# QUÉ HACE: Contratos de datos (DTO) de salida del módulo auth.
+# DETALLE: clases: JugadorOut, PersonajeOut
+# ============================================================================
 """Contratos de datos (DTO) de salida del módulo auth."""
 
 from datetime import datetime

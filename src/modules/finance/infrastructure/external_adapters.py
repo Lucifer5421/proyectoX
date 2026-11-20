@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: finance  |  CAPA: infrastructure  |  ARCHIVO: external_adapters.py
+# QUÉ HACE: Adaptador externo del módulo finance.
+# DETALLE: clases: WowFinanceAdapter
+# ============================================================================
 """Adaptador externo del módulo finance.
 
 Los depósitos, comisiones y transacciones son locales (PostgreSQL). El

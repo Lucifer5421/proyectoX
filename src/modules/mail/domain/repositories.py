@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: mail  |  CAPA: domain  |  ARCHIVO: repositories.py
+# QUÉ HACE: Contratos de repositorio del módulo mail.
+# DETALLE: clases: CorreoRepository
+# ============================================================================
 """Contratos de repositorio del módulo mail."""
 
 from abc import ABC, abstractmethod

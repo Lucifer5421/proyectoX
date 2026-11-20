@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: integraciones/wow  |  CAPA: integración  |  ARCHIVO: client.py
+# QUÉ HACE: Cliente MySQL de solo lectura para AzerothCore.
+# DETALLE: clases: WowClient
+# ============================================================================
 """Cliente MySQL de solo lectura para AzerothCore."""
 
 import re

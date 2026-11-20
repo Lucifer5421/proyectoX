@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: finance  |  CAPA: application  |  ARCHIVO: services.py
+# QUÉ HACE: Casos de uso del módulo finance.
+# DETALLE: clases: FinanceService
+# ============================================================================
 """Casos de uso del módulo finance.
 
 Registra depósitos, comisiones y transacciones de una subasta. El correo

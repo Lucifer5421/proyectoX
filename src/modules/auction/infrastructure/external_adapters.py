@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auction  |  CAPA: infrastructure  |  ARCHIVO: external_adapters.py
+# QUÉ HACE: Adaptador externo del módulo auction (subastas).
+# DETALLE: clases: WowAuctionAdapter
+# ============================================================================
 """Adaptador externo del módulo auction (subastas).
 
 Las subastas de proyectoX viven en PostgreSQL y no se consultan en tiempo de

@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: inventory  |  CAPA: application  |  ARCHIVO: dtos.py
+# QUÉ HACE: Contratos de datos (DTO) de salida del módulo inventory (catálogo e inventario).
+# DETALLE: clases: ItemOut, InventarioOut
+# ============================================================================
 """Contratos de datos (DTO) de salida del módulo inventory (catálogo e inventario)."""
 
 from decimal import Decimal

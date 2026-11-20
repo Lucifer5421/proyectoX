@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auction  |  CAPA: domain  |  ARCHIVO: models.py
+# QUÉ HACE: Entidades y reglas de negocio puras del módulo de subastas.
+# DETALLE: clases: EstadoSubasta, EstadoPuja, Puja, Subasta
+# ============================================================================
 """Entidades y reglas de negocio puras del módulo de subastas.
 
 Esta capa NO conoce SQLAlchemy, FastAPI ni PostgreSQL. Solo Python.

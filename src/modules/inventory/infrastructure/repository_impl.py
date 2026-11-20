@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: inventory  |  CAPA: infrastructure  |  ARCHIVO: repository_impl.py
+# QUÉ HACE: Implementaciones SQLAlchemy de los repositorios de inventory (catálogo e inventario).
+# DETALLE: clases: ItemRepositoryImpl, InventarioRepositoryImpl
+# ============================================================================
 """Implementaciones SQLAlchemy de los repositorios de inventory (catálogo e inventario)."""
 
 from decimal import Decimal

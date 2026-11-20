@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auction  |  CAPA: presentation  |  ARCHIVO: router.py
+# QUÉ HACE: Capa de presentación (API REST) del módulo de subastas.
+# DETALLE: endpoints: POST /, GET /, GET /{id_subasta}, POST /{id_subasta}/bids, GET /{id_subasta}/bids, POST /{id_sub...
+# ============================================================================
 """Capa de presentación (API REST) del módulo de subastas."""
 
 from typing import List, Optional

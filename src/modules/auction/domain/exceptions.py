@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auction  |  CAPA: domain  |  ARCHIVO: exceptions.py
+# QUÉ HACE: Excepciones de negocio del módulo de subastas.
+# DETALLE: clases: SubastaError, SubastaCerrada, PujaInsuficiente, CompraDirectaNoDisponible, SubastaNoEncontrada
+# ============================================================================
 """Excepciones de negocio del módulo de subastas."""
 
 

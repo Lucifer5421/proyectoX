@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auth  |  CAPA: infrastructure  |  ARCHIVO: external_adapters.py
+# QUÉ HACE: Adaptador externo del módulo auth con AzerothCore.
+# DETALLE: clases: WowAuthAdapter
+# ============================================================================
 """Adaptador externo del módulo auth con AzerothCore.
 
 La integración es de **solo lectura**: consulta las bases `acore_auth` y

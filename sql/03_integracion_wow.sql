@@ -13,7 +13,7 @@
 -- ============================================================
 
 -- ------------------------------------------------------------
--- 1. JUGADOR: el oro pertenece al personaje, no a la cuenta.
+-- 1. MÓDULO auth · JUGADOR: el oro pertenece al personaje, no a la cuenta.
 -- ------------------------------------------------------------
 ALTER TABLE jugador ADD COLUMN IF NOT EXISTS fecha_registro TIMESTAMP;
 UPDATE jugador SET fecha_registro = now() WHERE fecha_registro IS NULL;
@@ -22,7 +22,7 @@ ALTER TABLE jugador ALTER COLUMN fecha_registro SET NOT NULL;
 ALTER TABLE jugador DROP COLUMN IF EXISTS oro;
 
 -- ------------------------------------------------------------
--- 2. PERSONAJE: nombre único y checks del modelo.
+-- 2. MÓDULO auth · PERSONAJE: nombre único y checks del modelo.
 -- ------------------------------------------------------------
 DO $$
 BEGIN
@@ -47,13 +47,13 @@ BEGIN
 END $$;
 
 -- ------------------------------------------------------------
--- 3. ITEM: el modelo 2.1 limita el nombre a 100 caracteres.
+-- 3. MÓDULO inventory · ITEM: el modelo 2.1 limita el nombre a 100 caracteres.
 -- ------------------------------------------------------------
 UPDATE item SET nombre = LEFT(nombre, 100) WHERE length(nombre) > 100;
 ALTER TABLE item ALTER COLUMN nombre TYPE VARCHAR(100);
 
 -- ------------------------------------------------------------
--- 4. INVENTARIO: cantidad positiva.
+-- 4. MÓDULO inventory · INVENTARIO: cantidad positiva.
 -- ------------------------------------------------------------
 DO $$
 BEGIN
@@ -68,7 +68,7 @@ BEGIN
 END $$;
 
 -- ------------------------------------------------------------
--- 5. SUBASTA: duración y estados permitidos.
+-- 5. MÓDULO auction · SUBASTA: duración y estados permitidos.
 -- ------------------------------------------------------------
 DO $$
 BEGIN
@@ -94,7 +94,7 @@ BEGIN
 END $$;
 
 -- ------------------------------------------------------------
--- 6. PUJA: estados permitidos.
+-- 6. MÓDULO auction · PUJA: estados permitidos.
 -- ------------------------------------------------------------
 DO $$
 BEGIN
@@ -110,7 +110,7 @@ BEGIN
 END $$;
 
 -- ------------------------------------------------------------
--- 7. TRANSACCION: el vendedor se deduce de subasta; tipo del modelo.
+-- 7. MÓDULO finance · TRANSACCION: el vendedor se deduce de subasta; tipo del modelo.
 -- ------------------------------------------------------------
 ALTER TABLE transaccion DROP COLUMN IF EXISTS id_vendedor;
 UPDATE transaccion SET tipo = 'puja_ganadora' WHERE tipo = 'puja';
@@ -129,7 +129,7 @@ BEGIN
 END $$;
 
 -- ------------------------------------------------------------
--- 8. CORREO: estados del modelo 2.1.
+-- 8. MÓDULO mail · CORREO: estados del modelo 2.1.
 -- ------------------------------------------------------------
 UPDATE correo SET estado = 'cobrado' WHERE estado = 'entregado';
 
@@ -147,7 +147,8 @@ BEGIN
 END $$;
 
 -- ------------------------------------------------------------
--- 9. Columnas técnicas de integración con AzerothCore.
+-- 9. Integración WoW · columnas técnicas en auth e inventory.
+-- QUÉ HACE: claves externas de AzerothCore (fuera del modelo lógico 2.1).
 -- ------------------------------------------------------------
 ALTER TABLE jugador   ADD COLUMN IF NOT EXISTS wow_account_id INTEGER;
 ALTER TABLE personaje ADD COLUMN IF NOT EXISTS wow_guid INTEGER;

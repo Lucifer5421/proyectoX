@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: mail  |  CAPA: application  |  ARCHIVO: dtos.py
+# QUÉ HACE: Contratos de datos (DTO) de salida del módulo mail.
+# DETALLE: clases: CorreoOut
+# ============================================================================
 """Contratos de datos (DTO) de salida del módulo mail."""
 
 from datetime import datetime

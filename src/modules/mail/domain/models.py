@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: mail  |  CAPA: domain  |  ARCHIVO: models.py
+# QUÉ HACE: Entidades del módulo mail: correo del personaje.
+# DETALLE: clases: EstadoCorreo, Correo
+# ============================================================================
 """Entidades del módulo mail: correo del personaje.
 
 Solo Python: no conoce SQLAlchemy, FastAPI ni PostgreSQL.

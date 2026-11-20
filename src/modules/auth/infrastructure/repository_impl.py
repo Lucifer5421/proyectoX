@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auth  |  CAPA: infrastructure  |  ARCHIVO: repository_impl.py
+# QUÉ HACE: Implementaciones SQLAlchemy de los repositorios de auth.
+# DETALLE: clases: JugadorRepositoryImpl, PersonajeRepositoryImpl
+# ============================================================================
 """Implementaciones SQLAlchemy de los repositorios de auth."""
 
 from decimal import Decimal

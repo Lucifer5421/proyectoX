@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auth  |  CAPA: domain  |  ARCHIVO: exceptions.py
+# QUÉ HACE: Excepciones de negocio del módulo auth.
+# DETALLE: clases: AuthError, JugadorNoEncontrado, PersonajeNoEncontrado, FondosInsuficientes
+# ============================================================================
 """Excepciones de negocio del módulo auth."""
 
 

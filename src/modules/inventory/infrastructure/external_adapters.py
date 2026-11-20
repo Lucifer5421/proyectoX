@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: inventory  |  CAPA: infrastructure  |  ARCHIVO: external_adapters.py
+# QUÉ HACE: Adaptador externo del módulo inventory (catálogo e inventario) con AzerothCore.
+# DETALLE: clases: WowInventoryAdapter
+# ============================================================================
 """Adaptador externo del módulo inventory (catálogo e inventario) con AzerothCore.
 
 La integración es de **solo lectura**: consulta el inventario y el catálogo

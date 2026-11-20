@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auction  |  CAPA: application  |  ARCHIVO: services.py
+# QUÉ HACE: Casos de uso del módulo auction (subastas).
+# DETALLE: clases: AuctionService
+# ============================================================================
 """Casos de uso del módulo auction (subastas).
 
 Orquesta los módulos auth (personajes/oro), inventory (ítems), finance
@@ -32,25 +37,25 @@ from src.modules.auction.infrastructure.repository_impl import (
     PujaRepositoryImpl,
     SubastaRepositoryImpl,
 )
-from src.modules.auth.application.services import AuthService
-from src.modules.auth.domain.exceptions import FondosInsuficientes
-from src.modules.finance.application.services import FinanceService
-from src.modules.finance.domain.models import TipoTransaccion
-from src.modules.inventory.application.services import InventoryService
-from src.modules.inventory.domain.exceptions import ItemNoDisponible
-from src.modules.mail.application.services import MailService
-from src.modules.mail.domain.models import Correo
+from src.modules.auth.application.services import AuthService  # módulo auth: personajes y oro
+from src.modules.auth.domain.exceptions import FondosInsuficientes  # módulo auth
+from src.modules.finance.application.services import FinanceService  # módulo finance: depósito, comisión, transacción
+from src.modules.finance.domain.models import TipoTransaccion  # módulo finance
+from src.modules.inventory.application.services import InventoryService  # módulo inventory: ítems e inventario
+from src.modules.inventory.domain.exceptions import ItemNoDisponible  # módulo inventory
+from src.modules.mail.application.services import MailService  # módulo mail: buzón del personaje
+from src.modules.mail.domain.models import Correo  # módulo mail
 
 
 class AuctionService:
     def __init__(self, session: Session):
         self.session = session
-        self.auth = AuthService(session)
-        self.inventory = InventoryService(session)
-        self.finance = FinanceService(session)
-        self.mail = MailService(session)
-        self.subastas = SubastaRepositoryImpl(session)
-        self.pujas = PujaRepositoryImpl(session)
+        self.auth = AuthService(session)                # módulo auth
+        self.inventory = InventoryService(session)      # módulo inventory
+        self.finance = FinanceService(session)          # módulo finance
+        self.mail = MailService(session)                # módulo mail
+        self.subastas = SubastaRepositoryImpl(session)  # módulo auction
+        self.pujas = PujaRepositoryImpl(session)        # módulo auction
 
     # ------------------------------------------------------------------
     # Publicar

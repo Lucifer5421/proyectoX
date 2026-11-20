@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: inventory  |  CAPA: domain  |  ARCHIVO: repositories.py
+# QUÉ HACE: Contratos de repositorio del módulo inventory (catálogo e inventario).
+# DETALLE: clases: ItemRepository, InventarioRepository
+# ============================================================================
 """Contratos de repositorio del módulo inventory (catálogo e inventario)."""
 
 from abc import ABC, abstractmethod

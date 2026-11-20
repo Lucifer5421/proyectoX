@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auth  |  CAPA: domain  |  ARCHIVO: models.py
+# QUÉ HACE: Entidades del módulo auth: jugador y personaje.
+# DETALLE: clases: Jugador, Personaje
+# ============================================================================
 """Entidades del módulo auth: jugador y personaje.
 
 Solo Python: no conoce SQLAlchemy, FastAPI ni PostgreSQL.

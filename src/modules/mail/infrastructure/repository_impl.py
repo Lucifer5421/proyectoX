@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: mail  |  CAPA: infrastructure  |  ARCHIVO: repository_impl.py
+# QUÉ HACE: Implementaciones SQLAlchemy de los repositorios de mail.
+# DETALLE: clases: CorreoRepositoryImpl
+# ============================================================================
 """Implementaciones SQLAlchemy de los repositorios de mail."""
 
 from decimal import Decimal

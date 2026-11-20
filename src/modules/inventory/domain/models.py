@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: inventory  |  CAPA: domain  |  ARCHIVO: models.py
+# QUÉ HACE: Entidades del módulo inventory: catálogo de ítems e inventario.
+# DETALLE: clases: Item, Inventario
+# ============================================================================
 """Entidades del módulo inventory: catálogo de ítems e inventario.
 
 Solo Python: no conoce SQLAlchemy, FastAPI ni PostgreSQL.

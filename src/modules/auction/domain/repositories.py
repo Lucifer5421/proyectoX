@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auction  |  CAPA: domain  |  ARCHIVO: repositories.py
+# QUÉ HACE: Contratos de repositorio del módulo auction (subastas).
+# DETALLE: clases: SubastaRepository, PujaRepository
+# ============================================================================
 """Contratos de repositorio del módulo auction (subastas)."""
 
 from abc import ABC, abstractmethod

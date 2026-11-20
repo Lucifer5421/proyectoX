@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: finance  |  CAPA: domain  |  ARCHIVO: repositories.py
+# QUÉ HACE: Contratos de repositorio del módulo finance.
+# DETALLE: clases: DepositoRepository, ComisionRepository, TransaccionRepository
+# ============================================================================
 """Contratos de repositorio del módulo finance."""
 
 from abc import ABC, abstractmethod

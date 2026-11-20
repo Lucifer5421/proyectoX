@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auth  |  CAPA: application  |  ARCHIVO: services.py
+# QUÉ HACE: Casos de uso del módulo auth.
+# DETALLE: clases: AuthService
+# ============================================================================
 """Casos de uso del módulo auth.
 
 Gestiona cuentas, personajes y el oro de los personajes. No conoce FastAPI.

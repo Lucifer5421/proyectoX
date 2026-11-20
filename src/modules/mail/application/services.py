@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: mail  |  CAPA: application  |  ARCHIVO: services.py
+# QUÉ HACE: Casos de uso del módulo mail.
+# DETALLE: clases: MailService
+# ============================================================================
 """Casos de uso del módulo mail.
 
 Gestiona la entrega de ítems y oro al destinatario de una subasta. No

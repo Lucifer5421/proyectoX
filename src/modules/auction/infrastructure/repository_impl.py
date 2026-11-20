@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auction  |  CAPA: infrastructure  |  ARCHIVO: repository_impl.py
+# QUÉ HACE: Implementaciones SQLAlchemy de los repositorios de auction (subastas).
+# DETALLE: clases: SubastaRepositoryImpl, PujaRepositoryImpl
+# ============================================================================
 """Implementaciones SQLAlchemy de los repositorios de auction (subastas)."""
 
 from typing import List, Optional

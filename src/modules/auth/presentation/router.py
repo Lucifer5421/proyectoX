@@ -1,3 +1,8 @@
+# ============================================================================
+# MÓDULO: auth  |  CAPA: presentation  |  ARCHIVO: router.py
+# QUÉ HACE: Capa de presentación del módulo auth.
+# DETALLE: endpoints: GET /players, GET /characters, GET /characters/{id_personaje}
+# ============================================================================
 """Capa de presentación del módulo auth."""
 
 from typing import List
